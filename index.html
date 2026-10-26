@@ -1,0 +1,1557 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="theme-color" content="#070a0f" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<title>坦克动荡 · 坦克对战</title>
+<style>
+  :root {
+    --bg: #070a0f;
+    --bg2: #0d1420;
+    --p1: #ff5d5d;
+    --p1-soft: rgba(255, 93, 93, .16);
+    --p2: #4d9dff;
+    --p2-soft: rgba(77, 157, 255, .16);
+    --p3: #46d98a;
+    --p3-soft: rgba(70, 217, 138, .16);
+    --text: #e8eef8;
+    --muted: #7d8ba3;
+    --line: rgba(120, 160, 220, .14);
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    min-height: 100%;
+  }
+
+  body {
+    background:
+      radial-gradient(1100px 620px at 50% -10%, #16233a 0%, transparent 62%),
+      radial-gradient(700px 500px at 90% 110%, #2a1520 0%, transparent 60%),
+      var(--bg);
+    color: var(--text);
+    font-family: "HarmonyOS Sans SC", "PingFang SC", "Microsoft YaHei", "Segoe UI", system-ui, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 18px 16px 26px;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .stage {
+    width: min(96vw, 840px);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  /* ---------------- 顶部标题 ---------------- */
+  header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 0 2px;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: 21px;
+    letter-spacing: 5px;
+    font-weight: 800;
+    background: linear-gradient(92deg, #ff8080 0%, #ffd6a0 40%, #9ccbff 70%, #4d9dff 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-shadow: 0 0 26px rgba(120, 170, 255, .18);
+  }
+
+  header .sub {
+    font-size: 11.5px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .hdr-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 0 0 auto;
+  }
+
+  /* 返回主界面（模式选择）按钮 */
+  .home-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 11px 5px 9px;
+    border-radius: 9px;
+    border: 1px solid rgba(130, 175, 235, .22);
+    background: rgba(120, 170, 235, .07);
+    color: #a9bbd4;
+    font-family: inherit;
+    font-size: 11.5px;
+    letter-spacing: 1.2px;
+    line-height: 1.4;
+    cursor: pointer;
+    transition: color .16s ease, background .16s ease, border-color .16s ease, transform .12s ease;
+  }
+
+  .home-btn svg {
+    width: 13px;
+    height: 13px;
+    display: block;
+    opacity: .85;
+  }
+
+  .home-btn:hover {
+    color: #eaf3ff;
+    border-color: rgba(150, 195, 255, .55);
+    background: rgba(120, 170, 235, .18);
+    box-shadow: 0 6px 16px rgba(50, 100, 180, .22);
+  }
+
+  .home-btn:active { transform: translateY(1px); }
+  .home-btn:focus-visible { outline: 2px solid rgba(150, 195, 255, .65); outline-offset: 2px; }
+
+  /* ---------------- HUD（双人两栏 / 三人三栏） ---------------- */
+  .hud {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    padding: 8px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: linear-gradient(180deg, rgba(22, 32, 48, .92), rgba(12, 18, 28, .92));
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .35), inset 0 1px 0 rgba(255, 255, 255, .04);
+  }
+
+  .hud.three { grid-template-columns: 1fr 1fr 1fr; }
+
+  .pcard {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+    padding: 5px 9px 6px;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    background: linear-gradient(180deg, rgba(255, 255, 255, .035), rgba(255, 255, 255, .008));
+  }
+
+  .pcard.p1 { border-color: rgba(255, 93, 93, .26); }
+  .pcard.p2 { border-color: rgba(77, 157, 255, .26); }
+  .pcard.p3 { border-color: rgba(70, 217, 138, .26); }
+
+  .prow {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+  }
+
+  .tag {
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.2px;
+    padding: 2px 6px;
+    border-radius: 6px;
+    border: 1px solid currentColor;
+    opacity: .95;
+  }
+
+  .pcard.p1 .tag { color: var(--p1); background: var(--p1-soft); }
+  .pcard.p2 .tag { color: var(--p2); background: var(--p2-soft); }
+  .pcard.p3 .tag { color: var(--p3); background: var(--p3-soft); }
+
+  .name {
+    font-size: 12.5px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    white-space: nowrap;
+  }
+
+  .pcard.p1 .name { color: #ffb9b9; }
+  .pcard.p2 .name { color: #b7d9ff; }
+  .pcard.p3 .name { color: #a9f2c8; }
+
+  .hearts { display: flex; gap: 4px; }
+
+  .heart {
+    width: 14px;
+    height: 14px;
+    display: block;
+    transition: transform .18s ease, opacity .18s ease;
+  }
+
+  .heart.off { opacity: .16; transform: scale(.82); }
+  .heart svg { width: 100%; height: 100%; display: block; }
+
+  /* 弹药指示：5 颗小弹头，亮的＝还能再打几颗（场上自弹越多，亮的越少） */
+  .ammo {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    margin-left: auto;
+    padding-left: 2px;
+  }
+
+  .ammo i {
+    display: block;
+    width: 5px;
+    height: 9px;
+    border-radius: 2px 2px 1px 1px;
+    background: currentColor;
+    transition: opacity .16s ease, transform .16s ease;
+  }
+
+  .pcard.p1 .ammo { color: #ffb3b3; }
+  .pcard.p2 .ammo { color: #a9d0ff; }
+  .pcard.p3 .ammo { color: #a2ecc2; }
+
+  .ammo i.off { opacity: .16; transform: scaleY(.72); }
+  .ammo.empty i { opacity: .3; }
+
+  /* 状态标签：武器 / 护盾 / 隐身 */
+  .wchips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3px;
+    min-height: 14px;
+  }
+
+  .wchips i {
+    font-style: normal;
+    font-size: 9.5px;
+    line-height: 1.6;
+    padding: 0 4px;
+    border-radius: 4px;
+    border: 1px solid currentColor;
+    white-space: nowrap;
+    opacity: .92;
+  }
+
+  .wchips .laser { color: #8ff4ff; }
+  .wchips .shot { color: #ffd479; }
+  .wchips .mine { color: #ffb066; }
+  .wchips .cannon { color: #cbb8ff; }
+  .wchips .charge { color: #ffffff; animation: chipPulse .45s ease-in-out infinite alternate; }
+  @keyframes chipPulse { from { opacity: .5; } to { opacity: 1; } }
+  .wchips .shield { color: #9fe8ff; }
+  .wchips .invis { color: #b0a8ff; }
+  .wchips .cd { color: #6d7b93; }
+  .wchips .ready { color: rgba(176, 168, 255, .5); }
+
+  .prow .sbox {
+    margin-left: auto;
+    font-variant-numeric: tabular-nums;
+    font-weight: 800;
+    font-size: 21px;
+    letter-spacing: 0;
+    line-height: 1;
+  }
+
+  #score1 { color: var(--p1); text-shadow: 0 0 16px rgba(255, 93, 93, .45); }
+  #score2 { color: var(--p2); text-shadow: 0 0 16px rgba(77, 157, 255, .45); }
+  #score3 { color: var(--p3); text-shadow: 0 0 16px rgba(70, 217, 138, .45); }
+
+  @media (max-width: 620px) {
+    .pcard { padding: 4px 7px 5px; }
+    .prow .sbox { font-size: 18px; }
+    .name { font-size: 11px; letter-spacing: 1px; }
+    .heart { width: 12px; height: 12px; }
+    .wchips i { font-size: 9px; padding: 0 3px; }
+    .tag { font-size: 9px; padding: 1px 5px; }
+  }
+
+  /* ---- 加分跳动动画 ---- */
+  .sbox {
+    position: relative;
+    display: inline-block;
+    transform-origin: 50% 100%;
+    will-change: transform;
+  }
+
+  .sbox.pop { animation: scorePop .58s cubic-bezier(.2, 1.45, .35, 1); }
+
+  @keyframes scorePop {
+    0%   { transform: scale(1) translateY(0); }
+    28%  { transform: scale(1.5) translateY(-2px); }
+    56%  { transform: scale(1.17) translateY(0); }
+    78%  { transform: scale(1.06); }
+    100% { transform: scale(1); }
+  }
+
+  .plus {
+    position: absolute;
+    left: 50%;
+    bottom: 74%;
+    font-style: normal;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0;
+    opacity: 0;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+
+  .sbox.pop .plus { animation: plusFly .92s cubic-bezier(.2, .75, .3, 1) forwards; }
+
+  @keyframes plusFly {
+    0%   { opacity: 0; transform: translate(-50%, 7px) scale(.55); }
+    26%  { opacity: 1; transform: translate(-50%, -2px) scale(1.12); }
+    62%  { opacity: 1; transform: translate(-50%, -10px) scale(1); }
+    100% { opacity: 0; transform: translate(-50%, -18px) scale(.9); }
+  }
+
+  #box1 .plus { color: #ffb0b0; text-shadow: 0 0 14px rgba(255, 93, 93, .95); }
+  #box2 .plus { color: #a9d3ff; text-shadow: 0 0 14px rgba(77, 157, 255, .95); }
+  #box3 .plus { color: #a9f0c8; text-shadow: 0 0 14px rgba(70, 217, 138, .95); }
+
+  .sbox.pop #score1 { animation: glowP1 .58s ease-out; }
+  .sbox.pop #score2 { animation: glowP2 .58s ease-out; }
+  .sbox.pop #score3 { animation: glowP3 .58s ease-out; }
+
+  @keyframes glowP1 {
+    0%, 100% { text-shadow: 0 0 16px rgba(255, 93, 93, .45); }
+    35%      { text-shadow: 0 0 30px rgba(255, 93, 93, 1), 0 0 8px rgba(255, 225, 225, .9); }
+  }
+
+  @keyframes glowP2 {
+    0%, 100% { text-shadow: 0 0 16px rgba(77, 157, 255, .45); }
+    35%      { text-shadow: 0 0 30px rgba(77, 157, 255, 1), 0 0 8px rgba(215, 238, 255, .9); }
+  }
+
+  @keyframes glowP3 {
+    0%, 100% { text-shadow: 0 0 16px rgba(70, 217, 138, .45); }
+    35%      { text-shadow: 0 0 30px rgba(70, 217, 138, 1), 0 0 8px rgba(215, 255, 232, .9); }
+  }
+
+  /* ---------------- 画布 ---------------- */
+  .board {
+    position: relative;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid rgba(120, 160, 220, .18);
+    background: #080c12;
+    box-shadow:
+      0 24px 60px rgba(0, 0, 0, .55),
+      0 0 0 1px rgba(0, 0, 0, .5) inset,
+      0 0 70px rgba(60, 110, 200, .07);
+  }
+
+  canvas {
+    display: block;
+    width: 100%;
+    height: auto;
+    touch-action: none;
+  }
+
+  /* ---------------- 遮罩面板 ---------------- */
+  .overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(5, 8, 13, .74);
+    backdrop-filter: blur(7px);
+    -webkit-backdrop-filter: blur(7px);
+    transition: opacity .18s ease;
+    z-index: 5;
+  }
+
+  .overlay.hidden { opacity: 0; pointer-events: none; }
+
+  .panel {
+    width: min(100%, 460px);
+    text-align: center;
+    line-height: 1.6;
+    padding: 22px 24px 20px;
+    border-radius: 18px;
+    border: 1px solid rgba(130, 170, 230, .2);
+    background: linear-gradient(180deg, rgba(24, 34, 52, .96), rgba(12, 18, 28, .97));
+    box-shadow: 0 20px 60px rgba(0, 0, 0, .6), inset 0 1px 0 rgba(255, 255, 255, .05);
+  }
+
+  .kicker {
+    font-size: 10.5px;
+    letter-spacing: 4px;
+    color: #7fa6d8;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .panel h2 {
+    margin: 0 0 8px;
+    font-size: 27px;
+    line-height: 1.25;
+    letter-spacing: 4px;
+    font-weight: 800;
+    background: linear-gradient(92deg, #ff8a8a, #ffd9a3 45%, #8fc4ff 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .panel p {
+    margin: 0;
+    font-size: 12.5px;
+    line-height: 1.8;
+    color: #93a3bb;
+    letter-spacing: .3px;
+  }
+
+  .keys {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin: 16px 0 4px;
+  }
+
+  .keys .card {
+    border-radius: 11px;
+    padding: 9px 10px;
+    border: 1px solid var(--line);
+    background: rgba(255, 255, 255, .025);
+    text-align: left;
+  }
+
+  .keys .card b {
+    display: block;
+    font-size: 11.5px;
+    letter-spacing: 1.6px;
+    margin-bottom: 5px;
+  }
+
+  .keys .card.p1 b { color: var(--p1); }
+  .keys .card.p2 b { color: var(--p2); }
+
+  .keys .card span {
+    display: block;
+    font-size: 11.5px;
+    color: #98a8c0;
+    line-height: 1.75;
+  }
+
+  kbd {
+    display: inline-block;
+    min-width: 17px;
+    padding: 1px 5px;
+    margin: 0 1px;
+    border-radius: 5px;
+    border: 1px solid rgba(140, 175, 230, .28);
+    border-bottom-width: 2px;
+    background: rgba(140, 175, 230, .1);
+    font-family: inherit;
+    font-size: 10.5px;
+    color: #cfdcf0;
+    text-align: center;
+  }
+
+  .hint {
+    margin-top: 14px;
+    font-size: 12px;
+    letter-spacing: 1.4px;
+    color: #cfe0f5;
+  }
+
+  .hint em {
+    font-style: normal;
+    color: #ffd479;
+    animation: blink 1.4s ease-in-out infinite;
+  }
+
+  /* 遮罩面板内的按钮组 */
+  .panel-btns {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 16px;
+  }
+
+  .panel-btns[hidden] { display: none; }
+
+  .pbtn {
+    min-width: 112px;
+    padding: 9px 16px;
+    border-radius: 10px;
+    border: 1px solid rgba(130, 175, 235, .26);
+    background: rgba(120, 170, 235, .1);
+    color: #c6d6ea;
+    font-family: inherit;
+    font-size: 12.5px;
+    letter-spacing: 1.2px;
+    cursor: pointer;
+    transition: color .16s ease, background .16s ease, border-color .16s ease, transform .12s ease, box-shadow .16s ease;
+  }
+
+  .pbtn:hover {
+    color: #eef6ff;
+    border-color: rgba(155, 200, 255, .5);
+    background: rgba(120, 170, 235, .2);
+  }
+
+  .pbtn:active { transform: translateY(1px); }
+
+  .pbtn.primary {
+    color: #f2f8ff;
+    border-color: rgba(160, 200, 255, .48);
+    background: linear-gradient(180deg, rgba(90, 150, 235, .34), rgba(70, 120, 200, .18));
+    box-shadow: 0 6px 18px rgba(60, 120, 210, .2), inset 0 1px 0 rgba(255, 255, 255, .1);
+  }
+
+  .pbtn.primary:hover {
+    background: linear-gradient(180deg, rgba(105, 165, 245, .46), rgba(80, 135, 215, .24));
+    box-shadow: 0 8px 22px rgba(60, 120, 210, .3), inset 0 1px 0 rgba(255, 255, 255, .14);
+  }
+
+  @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
+
+  /* ---------------- 大厅：模式选择 ---------------- */
+  .lobby {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background:
+      radial-gradient(900px 520px at 50% 0%, #16233a 0%, transparent 62%),
+      rgba(5, 8, 13, .9);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+
+  .lobby[hidden] { display: none; }
+
+  .lobby-card {
+    width: min(100%, 520px);
+    padding: 26px 26px 22px;
+    border-radius: 20px;
+    border: 1px solid rgba(130, 170, 230, .2);
+    background: linear-gradient(180deg, rgba(24, 34, 52, .97), rgba(10, 15, 24, .98));
+    box-shadow: 0 30px 80px rgba(0, 0, 0, .65), inset 0 1px 0 rgba(255, 255, 255, .05);
+    text-align: center;
+  }
+
+  .lobby-card h2 {
+    margin: 0 0 6px;
+    font-size: 26px;
+    letter-spacing: 4px;
+    font-weight: 800;
+    background: linear-gradient(92deg, #ff8a8a, #ffd9a3 45%, #8fc4ff 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .lobby-sub {
+    margin: 0 0 18px;
+    font-size: 12px;
+    color: #8494ad;
+    letter-spacing: 2px;
+  }
+
+  .modes {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .mode-card {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 16px 14px;
+    border-radius: 14px;
+    border: 1px solid var(--line);
+    background: rgba(255, 255, 255, .03);
+    color: inherit;
+    font-family: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition: transform .16s ease, border-color .16s ease, background .16s ease, box-shadow .16s ease;
+  }
+
+  .mode-card b { font-size: 15px; letter-spacing: 1.5px; }
+  .mode-card span { font-size: 11.5px; color: #8d9db6; line-height: 1.65; }
+
+  .mode-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(130, 175, 235, .38);
+    background: rgba(120, 170, 235, .08);
+    box-shadow: 0 12px 26px rgba(0, 0, 0, .35);
+  }
+
+  .mode-card:active { transform: translateY(0); }
+  #btnLocal b { color: #ff9b9b; }
+  #btnLan b { color: #8fc4ff; }
+
+  /* 单人模式：主推入口，占满一整行 */
+  #btnSolo { grid-column: 1 / -1; }
+  #btnSolo b { color: #ffd479; }
+  .mode-card.solo {
+    background: linear-gradient(135deg, rgba(255, 200, 110, .10), rgba(120, 170, 235, .06));
+    border-color: rgba(255, 205, 120, .30);
+  }
+  .mode-card.solo:hover {
+    border-color: rgba(255, 210, 130, .55);
+    background: linear-gradient(135deg, rgba(255, 200, 110, .16), rgba(120, 170, 235, .10));
+  }
+
+  .lan-box { margin-top: 16px; text-align: left; }
+  .lan-box[hidden] { display: none; }
+
+  /* 人数选择：2 人 / 3 人 */
+  .size-pick {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .size-btn {
+    flex: 1;
+    padding: 9px 10px;
+    border-radius: 10px;
+    border: 1px solid rgba(130, 175, 235, .22);
+    background: rgba(120, 170, 235, .06);
+    color: #93a3bb;
+    font-family: inherit;
+    font-size: 12.5px;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: color .16s ease, background .16s ease, border-color .16s ease;
+  }
+
+  .size-btn.on {
+    border-color: rgba(150, 195, 255, .6);
+    background: rgba(120, 170, 235, .18);
+    color: #eaf3ff;
+    box-shadow: 0 6px 16px rgba(50, 100, 180, .22);
+  }
+
+  .lan-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: stretch; }
+
+  .btn {
+    flex: 0 0 auto;
+    padding: 10px 16px;
+    border-radius: 11px;
+    border: 1px solid rgba(130, 175, 235, .3);
+    background: rgba(120, 170, 235, .12);
+    color: #dce8f8;
+    font-family: inherit;
+    font-size: 12.5px;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: background .16s ease, border-color .16s ease, transform .12s ease;
+  }
+
+  .btn:hover { background: rgba(120, 170, 235, .2); border-color: rgba(150, 190, 245, .5); }
+  .btn:active { transform: translateY(1px); }
+  .btn:disabled { opacity: .45; cursor: default; }
+
+  .btn.primary {
+    background: linear-gradient(180deg, rgba(255, 93, 93, .22), rgba(255, 93, 93, .1));
+    border-color: rgba(255, 120, 120, .4);
+    color: #ffc9c9;
+  }
+
+  .btn.ghost {
+    margin-top: 14px;
+    background: transparent;
+    border-color: rgba(130, 175, 235, .18);
+    color: #9aabc4;
+  }
+
+  .join { display: flex; gap: 8px; flex: 1 1 170px; }
+
+  #roomInput {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: 10px 12px;
+    border-radius: 11px;
+    border: 1px solid rgba(130, 175, 235, .26);
+    background: rgba(8, 13, 20, .85);
+    color: #e8eef8;
+    font-family: inherit;
+    font-size: 14px;
+    letter-spacing: 6px;
+    text-align: center;
+    text-transform: uppercase;
+  }
+
+  #roomInput::placeholder { letter-spacing: 2px; color: #5f6f88; }
+
+  #roomInput:focus {
+    outline: none;
+    border-color: rgba(160, 200, 255, .6);
+    box-shadow: 0 0 0 3px rgba(80, 140, 220, .16);
+  }
+
+  .lan-status {
+    margin-top: 12px;
+    min-height: 20px;
+    font-size: 12px;
+    line-height: 1.7;
+    color: #93a3bb;
+  }
+
+  .lan-status[data-kind="error"] { color: #ff9f9f; }
+  .lan-status[data-kind="ok"] { color: #97e2b4; }
+
+  .lan-code {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin-top: 12px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1px dashed rgba(150, 200, 255, .32);
+    background: rgba(90, 150, 230, .07);
+  }
+
+  .lan-code[hidden] { display: none; }
+  .lan-code .lab { font-size: 11px; letter-spacing: 2px; color: #8b9cb5; }
+  .lan-code b {
+    font-size: 24px;
+    letter-spacing: 8px;
+    color: #ffd9a3;
+    text-shadow: 0 0 22px rgba(255, 200, 130, .5);
+    font-variant-numeric: tabular-nums;
+  }
+  .lan-code .tip { font-size: 11px; color: #7f8ea6; line-height: 1.5; }
+
+  /* 局域网地址：方便另一台设备（手机）直接在浏览器里输入 */
+  .lan-addr {
+    margin-top: 10px;
+    padding: 9px 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(120, 170, 235, .18);
+    background: rgba(60, 110, 180, .09);
+    font-size: 11.5px;
+    line-height: 1.6;
+    color: #8fa2bd;
+    word-break: break-all;
+  }
+  .lan-addr[hidden] { display: none; }
+  .lan-addr b {
+    color: #9fd0ff;
+    font-size: 13.5px;
+    letter-spacing: .6px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .lobby-foot {
+    margin-top: 16px;
+    font-size: 11.5px;
+    color: #7e8da5;
+    line-height: 1.9;
+  }
+
+  /* ---------------- 底部说明 ---------------- */
+  footer {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 8px 18px;
+    padding: 0 4px;
+    font-size: 11.5px;
+    color: #72809a;
+    letter-spacing: .4px;
+  }
+
+  footer .grp { display: flex; align-items: center; gap: 7px; }
+  footer .dot { width: 6px; height: 6px; border-radius: 50%; }
+  footer .dot.a { background: var(--p1); box-shadow: 0 0 8px var(--p1); }
+  footer .dot.b { background: var(--p2); box-shadow: 0 0 8px var(--p2); }
+  footer .dot.c { background: var(--p3); box-shadow: 0 0 8px var(--p3); }
+
+  @media (orientation: landscape) and (max-height: 480px) {
+    .lobby { padding: 10px; }
+    .lobby-card { padding: 16px 18px 14px; }
+    .lobby-card h2 { font-size: 22px; }
+    .lobby-sub { margin: 2px 0 12px; }
+    .mode-card { padding: 12px 14px; }
+    .mode-card b { font-size: 15px; }
+    .mode-card span { font-size: 11px; }
+    .lobby-foot { margin-top: 10px; font-size: 11px; line-height: 1.6; }
+  }
+
+  @media (max-width: 560px) {
+    .modes { grid-template-columns: 1fr; }
+    .lobby-card { padding: 20px 18px 16px; }
+  }
+
+  @media (max-width: 620px) {
+    h1 { font-size: 17px; letter-spacing: 3px; }
+    header .sub { display: none; }
+    .home-btn { padding: 5px 9px; font-size: 11px; }
+    .score { font-size: 20px; }
+    .keys { grid-template-columns: 1fr; }
+    .name { display: none; }
+  }
+
+  @media (max-width: 400px) {
+    .home-btn span { display: none; }
+    .home-btn { padding: 6px; }
+    .home-btn svg { width: 15px; height: 15px; }
+  }
+
+  /* ================= 手机触屏操控 ================= */
+  body.touch-mode {
+    overscroll-behavior: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  body.touch-mode footer { display: none; }        /* 触屏下用摇杆，不再显示键盘提示 */
+
+  .touch-ui {
+    --stick: min(120px, 27vmin);
+    --fire: min(94px, 21vmin);
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: none;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 0 16px calc(14px + env(safe-area-inset-bottom, 0px));
+    z-index: 30;
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    transition: opacity .16s ease;
+  }
+  body.touch-mode .touch-ui { display: flex; }
+  .touch-ui.off { opacity: .18; }
+  .touch-ui.off .stick,
+  .touch-ui.off .fire-btn,
+  .touch-ui.off .skill-btn { pointer-events: none; }
+
+  .btn-col {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    pointer-events: none;
+  }
+
+  /* 隐身技能按钮（手机没有键盘） */
+  .skill-btn {
+    pointer-events: auto;
+    width: calc(var(--fire) * 0.66);
+    height: calc(var(--fire) * 0.66);
+    padding: 0;
+    border-radius: 50%;
+    border: 1px solid rgba(176, 168, 255, .45);
+    background: radial-gradient(circle at 50% 36%, rgba(160, 150, 255, .32), rgba(46, 40, 104, .66) 74%);
+    color: #d3ccff;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    line-height: 1;
+    touch-action: none;
+    cursor: pointer;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, .45), inset 0 0 18px rgba(150, 140, 255, .18);
+    transition: transform .08s ease, opacity .2s ease;
+  }
+
+  .skill-btn:active { transform: scale(.94); }
+  .skill-btn.cool { opacity: .32; }
+  .skill-btn.on { color: #fff; box-shadow: 0 0 26px rgba(160, 150, 255, .6); }
+
+  .stick {
+    position: relative;
+    width: var(--stick);
+    height: var(--stick);
+    border-radius: 50%;
+    border: 1px solid rgba(140, 180, 240, .3);
+    background:
+      radial-gradient(circle at 50% 42%, rgba(46, 70, 108, .5), rgba(8, 13, 21, .66) 72%);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, .5), inset 0 0 24px rgba(80, 130, 200, .16);
+    -webkit-backdrop-filter: blur(3px);
+    backdrop-filter: blur(3px);
+    touch-action: none;
+    pointer-events: auto;
+    cursor: pointer;
+  }
+
+  .stick-ring {
+    position: absolute;
+    inset: 15%;
+    border-radius: 50%;
+    border: 1px dashed rgba(130, 170, 230, .22);
+  }
+
+  .stick-arrows {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    color: rgba(150, 190, 245, .34);
+    pointer-events: none;
+  }
+
+  .stick-knob {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 44%;
+    height: 44%;
+    margin: -22% 0 0 -22%;
+    border-radius: 50%;
+    background: radial-gradient(circle at 38% 32%, #c4dbff, #5f8bcd 56%, #2b4872);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, .55), 0 0 18px rgba(90, 150, 230, .4);
+    will-change: transform;
+    pointer-events: none;
+  }
+
+  /* 摇杆方向标：跟着手指指向转，提示“摇杆指向 = 坦克前进方向” */
+  .knob-dir {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    will-change: transform;
+  }
+  .knob-dir::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: 3%;
+    width: 0;
+    height: 0;
+    margin-top: -5px;
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+    border-left: 7px solid rgba(238, 247, 255, .95);
+    filter: drop-shadow(0 0 4px rgba(160, 210, 255, .85));
+  }
+
+  .fire-btn {
+    pointer-events: auto;
+    width: var(--fire);
+    height: var(--fire);
+    padding: 0;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 120, 120, .45);
+    background:
+      radial-gradient(circle at 50% 38%, rgba(255, 118, 118, .34), rgba(118, 24, 24, .6) 74%);
+    color: #ffc0c0;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    touch-action: none;
+    cursor: pointer;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, .5), inset 0 0 22px rgba(255, 90, 90, .2);
+    transition: transform .07s ease, box-shadow .12s ease, background .12s ease;
+  }
+  .fire-btn svg { width: 30%; height: 30%; min-width: 22px; min-height: 22px; }
+  .fire-btn.on {
+    transform: scale(.94);
+    color: #fff;
+    background:
+      radial-gradient(circle at 50% 38%, rgba(255, 160, 160, .55), rgba(168, 32, 32, .72) 74%);
+    box-shadow: 0 0 30px rgba(255, 90, 90, .55), inset 0 0 26px rgba(255, 120, 120, .32);
+  }
+
+  /* 竖屏提示：横屏视野更宽 */
+  .rotate-tip {
+    position: fixed;
+    left: 50%;
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    transform: translateX(-50%);
+    display: none;
+    padding: 5px 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(140, 180, 240, .22);
+    background: rgba(12, 20, 32, .78);
+    color: #93a6c2;
+    font-size: 11px;
+    letter-spacing: 1px;
+    white-space: nowrap;
+    z-index: 31;
+    pointer-events: none;
+  }
+  /* 竖屏留白处的操作说明，10 秒后自动淡出 */
+  .touch-hint {
+    display: none;
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 56%;
+    text-align: center;
+    font-size: 12px;
+    line-height: 2.1;
+    color: #64748c;
+    letter-spacing: .6px;
+    pointer-events: none;
+    z-index: 29;
+  }
+  .touch-hint b { color: #9db4d4; font-weight: 700; }
+
+  @media (orientation: portrait) {
+    body.touch-mode .touch-hint {
+      display: block;
+      animation: hintFade .9s ease 10s forwards;
+    }
+  }
+  @keyframes hintFade { to { opacity: 0; } }
+
+  @media (orientation: portrait) {
+    body.touch-mode .rotate-tip { display: block; }
+    /* 竖屏空间富裕：棋盘靠上，下方留给大拇指与摇杆 */
+    body.touch-mode { justify-content: flex-start; padding-top: 14px; }
+  }
+
+  /* 横屏手机：标题栏收成底部居中的小按钮，棋盘按屏幕高度铺满，摇杆落在两侧空档 */
+  @media (orientation: landscape) {
+    body.touch-mode {
+      padding: 6px 8px;
+      overflow: hidden;
+      justify-content: center;
+    }
+    /* 「主界面」按钮挪到右上角空档，避免压住棋盘 */
+    body.touch-mode header {
+      position: fixed;
+      right: 10px;
+      top: 8px;
+      left: auto;
+      bottom: auto;
+      transform: none;
+      z-index: 32;
+      padding: 0;
+    }
+    body.touch-mode header h1,
+    body.touch-mode header .sub { display: none; }
+    body.touch-mode header .hdr-right { gap: 0; }
+    body.touch-mode .stage {
+      width: min(96vw, calc((100vh - 74px) * 1.4706));
+      gap: 8px;
+    }
+    body.touch-mode .hud { padding: 6px 12px; }
+    .touch-ui { --stick: min(112px, 30vh); --fire: min(88px, 24vh); }
+  }
+
+  /* ================= 手机双人同屏：单地图居中 + 上下两条操作键 + 左侧比分 =================
+     两位玩家共用同一张战场，屏幕竖着分三段：
+       上段 = 蓝方（P2）的操作键，开火在左、摇杆在右，中间标「蓝方操控键」（这一行字上下颠倒）；
+       中段 = 战场画面，只有一张、正着放、居中；
+       下段 = 红方（P1）的操作键，摇杆在左、开火在右，中间标「红方操控键」。
+     摇杆方向就是画面方向：推哪边，自己那辆车就往哪边开，两位玩家规则一致。
+     左侧空白挂两排比分（上排 180° 倒转给蓝方看，下排正着给红方看），
+     右侧空白放「主界面」。这个模式不显示 P1 / P2 状态卡。
+     主界面 / 提示面板不做对称，仍按正常方向显示。 */
+  #touchUI2 { display: none; }
+  .duel-tip { display: none; }
+  .duel-home { display: none; }
+  .duel-scores { display: none; }
+  .pad-label { display: none; }
+  .pad-stat { display: none; }
+
+  body.duel-touch {
+    --pad-h: 30dvh;
+    --side: 54px;                      /* 左右两条空白栏：左挂比分、右挂主界面 */
+    --field-w: min(calc(100% - var(--side) * 2), calc((100dvh - var(--pad-h) * 2 - 14px) * 1.4706));
+    padding: 0 !important;
+    overflow: hidden;
+  }
+
+  /* 回到大厅时收掉屏幕上的摇杆与比分，别浮在模式选择上面 */
+  body.in-lobby .touch-ui,
+  body.in-lobby .duel-scores,
+  body.in-lobby .duel-tip { display: none !important; }
+
+  body.duel-touch .stage {
+    width: 100%;
+    max-width: none;
+    min-height: 100dvh;
+    height: 100dvh;
+    box-sizing: border-box;
+    padding: calc(var(--pad-h) + 7px) 0;
+    gap: 0;
+    justify-content: center;
+    align-items: center;
+  }
+
+  body.duel-touch header,
+  body.duel-touch footer,
+  body.duel-touch .hud { display: none !important; }
+
+  /* 战场只有一块：去掉外框，左右等宽留白后居中 */
+  body.duel-touch .board {
+    flex: 0 0 auto;
+    margin: 0 auto;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    background: transparent;
+    overflow: visible;
+  }
+
+  body.duel-touch #game {
+    display: block;
+    width: var(--field-w);
+    height: auto;
+    margin: 0 auto;
+  }
+
+  /* 提示面板铺满整屏、方向正常（不跟着上侧玩家旋转），点屏幕即可开始 */
+  body.duel-touch .overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    border-radius: 0;
+  }
+
+  /* 上下两条操作区：中间留出战场，摇杆可以做得比单人时更大 */
+  body.duel-touch .touch-ui {
+    align-items: center;
+    padding: 0 10px;
+    gap: 8px;
+    justify-content: space-between;
+    --stick: min(150px, 33vmin);
+    --fire: min(112px, 25vmin);
+  }
+
+  body.duel-touch #touchUI {
+    top: auto;
+    bottom: 0;
+    height: var(--pad-h);
+    padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* 上侧玩家的操作层：开火在左、摇杆在右（镜像摆放，两人的手各占一边） */
+  body.duel-touch #touchUI2 {
+    display: flex;
+    top: 0;
+    bottom: auto;
+    height: var(--pad-h);
+    padding-top: calc(6px + env(safe-area-inset-top, 0px));
+    flex-direction: row-reverse;
+    z-index: 31;
+  }
+
+  /* 「红方操控键」/「蓝方操控键」：夹在自己那条操作区的摇杆与开火键之间，
+     排布用弹性布局，宽度不够时自动让位，不会压到旁边的血量面板 */
+  body.duel-touch .pad-label {
+    display: block;
+    flex: 0 1 auto;
+    min-width: 0;
+    text-align: center;
+    font-size: clamp(10px, 1.7vmin, 15px);
+    font-weight: 800;
+    letter-spacing: 2px;
+    white-space: nowrap;
+    pointer-events: none;
+    text-shadow: 0 1px 6px rgba(0, 0, 0, .8);
+  }
+  body.duel-touch #padLabel1 { color: #ff8b8b; }
+  /* 蓝方那一行上下颠倒：他倒着看手机时正好是正的 */
+  body.duel-touch #padLabel2 {
+    color: #78b4ff;
+    transform: rotate(180deg);
+  }
+
+  /* 双人同屏的开火键旁边：血量 + 弹夹小面板（红方在开火键左边，蓝方在右边） */
+  body.duel-touch .pad-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 5px 4px;
+    box-sizing: border-box;
+    border-radius: 9px;
+    border: 1px solid rgba(120, 150, 190, .18);
+    background: rgba(10, 14, 21, .55);
+    pointer-events: none;
+  }
+  /* 蓝方那一块整体倒转：倒着看手机时才是正的 */
+  body.duel-touch .pad-stat.flip { transform: rotate(180deg); }
+  body.duel-touch .pad-stat .hearts { gap: 2px; }
+  body.duel-touch .pad-stat .heart {
+    width: clamp(12px, 2.2vmin, 17px);
+    height: clamp(12px, 2.2vmin, 17px);
+  }
+  body.duel-touch .pad-stat .ammo {
+    margin-left: 0;
+    padding-left: 0;
+    gap: 3px;
+    justify-content: center;
+  }
+  body.duel-touch .pad-stat .ammo i {
+    width: clamp(4px, .8vmin, 6px);
+    height: clamp(8px, 1.5vmin, 11px);
+  }
+  body.duel-touch #padStat1 .ammo { color: #ffb3b3; }
+  body.duel-touch #padStat2 .ammo { color: #a9d0ff; }
+
+  /* 蓝方开火键整体以中心 180° 倒转（含图标与「开火」二字） */
+  body.duel-touch #fireBtn2 { transform: rotate(180deg); }
+  body.duel-touch #fireBtn2.on { transform: rotate(180deg) scale(.94); }
+
+  /* 左侧比分：两排，上排倒转给蓝方、下排正着给红方 */
+  body.duel-touch .duel-scores {
+    display: flex;
+    position: fixed;
+    left: 4px;
+    top: var(--pad-h);
+    bottom: var(--pad-h);
+    width: calc(var(--side) - 8px);
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+    z-index: 32;
+    pointer-events: none;
+  }
+  body.duel-touch .ds-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 6px 3px;
+    box-sizing: border-box;
+    width: 100%;
+    border-radius: 10px;
+    border: 1px solid rgba(120, 150, 190, .16);
+    background: rgba(10, 14, 21, .62);
+    font-size: clamp(10px, 1.5vmin, 13px);
+    line-height: 1.2;
+    letter-spacing: .5px;
+  }
+  body.duel-touch .ds-card.flip { transform: rotate(180deg); }
+  body.duel-touch .ds-card .who { font-weight: 800; }
+  body.duel-touch .ds-card .who.r { color: #ff8080; }
+  body.duel-touch .ds-card .who.b { color: #7bb6ff; }
+  body.duel-touch .ds-card .num {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 1px;
+    font-size: clamp(16px, 2.6vmin, 22px);
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.05;
+  }
+  body.duel-touch .ds-card .num i { font-style: normal; }
+  body.duel-touch .ds-card .num i.r { color: #ff5a5a; }
+  body.duel-touch .ds-card .num i.b { color: #4f9bff; }
+  body.duel-touch .ds-card .num em { font-style: normal; font-size: 10px; color: #6f7d90; }
+
+  /* 双人模式没有隐身技能，两个小圆钮都不留 */
+  body.duel-touch .skill-btn { display: none !important; }
+
+  /* 双人同屏时不再显示单人摇杆说明 / 横屏建议 */
+  body.duel-touch .touch-hint,
+  body.duel-touch .rotate-tip { display: none !important; }
+
+  /* 右侧空白处的「主界面」：竖排小胶囊，紧贴画面右边缘之外 */
+  body.duel-touch .duel-home {
+    display: flex;
+    position: fixed;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 33;
+    width: 28px;
+    padding: 9px 0;
+    box-sizing: border-box;
+    align-items: center;
+    justify-content: center;
+    writing-mode: vertical-rl;
+    border-radius: 9px;
+    border: 1px solid rgba(130, 175, 235, .24);
+    background: rgba(120, 170, 235, .1);
+    color: #9fb2cc;
+    font-family: inherit;
+    font-size: 10px;
+    letter-spacing: 2px;
+    line-height: 1.15;
+    cursor: pointer;
+  }
+  body.duel-touch .duel-home:active { background: rgba(120, 170, 235, .22); }
+
+  body.duel-touch .duel-tip {
+    display: block;
+    position: fixed;
+    left: 50%;
+    top: calc(50% - 46px);
+    transform: translate(-50%, -50%);
+    padding: 6px 15px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 200, 120, .3);
+    background: rgba(26, 19, 10, .86);
+    color: #ffcf8a;
+    font-size: 12px;
+    letter-spacing: 1.2px;
+    white-space: nowrap;
+    z-index: 34;
+    cursor: pointer;
+    animation: duelTipIn .3s ease;
+  }
+  body.duel-touch .duel-tip.gone { display: none; }
+  body.duel-touch .duel-tip em { font-style: normal; color: #c9a978; font-size: 11px; }
+  @keyframes duelTipIn { from { opacity: 0; } to { opacity: 1; } }
+
+  /* 横屏手机：上下操作区按比例收窄一点，摇杆相应调小，尽量把画面留大 */
+  @media (orientation: landscape) {
+    body.duel-touch {
+      --pad-h: 22dvh;
+      --side: 46px;
+      --field-w: min(calc(100% - var(--side) * 2), calc((100dvh - var(--pad-h) * 2 - 10px) * 1.4706));
+    }
+    body.duel-touch .touch-ui { --stick: min(98px, 23vmin); --fire: min(78px, 18vmin); }
+    body.duel-touch .pad-label { font-size: 10px; letter-spacing: 2px; }
+    body.duel-touch .pad-stat { padding: 3px; gap: 3px; }
+    body.duel-touch .ds-card { padding: 4px 2px; }
+    body.duel-touch .ds-card .num { font-size: 13px; }
+  }
+
+  /* 大厅在矮屏上可以滚动，避免按钮被裁掉 */
+  .lobby { overflow-y: auto; align-items: flex-start; }
+  .lobby-card { margin: auto; }
+</style>
+</head>
+<body>
+  <!-- 大厅：模式选择 -->
+  <div class="lobby" id="lobby">
+    <div class="lobby-card">
+      <div class="kicker">Tank Turmoil</div>
+      <h2>坦克动荡</h2>
+      <p class="lobby-sub">选择游戏模式</p>
+
+      <div id="panelSelect">
+        <div class="modes">
+          <button class="mode-card solo" id="btnSolo" type="button">
+            <b>单人模式</b>
+            <span id="soloDesc">你和电脑 1v1 · 电脑会算反弹弹道、侧身躲子弹<br />键盘 WASD / 方向键，手机用屏幕摇杆</span>
+          </button>
+          <button class="mode-card" id="btnLocal" type="button">
+            <b>双人游戏</b>
+            <span id="localDesc">两人一台设备，各占一端<br />手机上下各一套屏幕摇杆，共用一张地图</span>
+          </button>
+          <button class="mode-card" id="btnLan" type="button">
+            <b>局域网联机</b>
+            <span id="lanDesc">2~3 台设备连同一 WiFi<br />一人建房，其他人输房间码加入</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="lan-box" id="lanBox" hidden>
+        <div class="size-pick" id="sizePick">
+          <button class="size-btn on" type="button" data-max="2">2 人对战 · 4 张地图</button>
+          <button class="size-btn" type="button" data-max="3">3 人对战 · 4 张地图</button>
+        </div>
+        <div class="lan-row">
+          <button class="btn primary" id="btnCreate" type="button">创建房间</button>
+          <div class="join">
+            <input id="roomInput" maxlength="4" placeholder="房间码" autocomplete="off" spellcheck="false" />
+            <button class="btn" id="btnJoin" type="button">加入</button>
+          </div>
+        </div>
+        <div class="lan-code" id="lanCode" hidden>
+          <span class="lab">房间码</span>
+          <b id="codeText">----</b>
+          <span class="tip">把这 4 位码告诉其他玩家，同一局域网内打开本页即可加入</span>
+        </div>
+        <button class="btn" id="btnStartNow" type="button" hidden>就 2 人开打</button>
+        <div class="lan-addr" id="lanAddr" hidden></div>
+        <div class="lan-status" id="lanStatus"></div>
+        <button class="btn ghost" id="btnBack" type="button">返回模式选择</button>
+      </div>
+
+      <div class="lobby-foot" id="lobbyHint"></div>
+    </div>
+  </div>
+
+  <div class="stage">
+    <header>
+      <h1>坦 克 动 荡</h1>
+      <div class="hdr-right">
+        <div class="sub" id="modeSub">Tank Turmoil · 双人游戏 1v1</div>
+        <button class="home-btn" id="btnHome" type="button" title="返回主界面（重新选择模式）">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M12 3.1 2.4 11.3h2.7v8.4h5.1v-5.3h3.6v5.3h5.1v-8.4h2.7z" />
+          </svg>
+          <span>主界面</span>
+        </button>
+      </div>
+    </header>
+
+    <div class="hud" id="hud">
+      <div class="pcard p1" id="pcard1">
+        <div class="prow">
+          <span class="tag">P1</span>
+          <span class="name">红方</span>
+          <span class="sbox" id="box1"><span id="score1">0</span><em class="plus">+1</em></span>
+        </div>
+        <div class="prow">
+          <div class="hearts" id="hp1"></div>
+          <div class="ammo" id="ammo1" title="可再发射的子弹数（同时最多 4 颗在场上）"></div>
+        </div>
+        <div class="wchips" id="wpn1"></div>
+      </div>
+
+
+      <div class="pcard p2" id="pcard2">
+        <div class="prow">
+          <span class="tag">P2</span>
+          <span class="name">蓝方</span>
+          <span class="sbox" id="box2"><span id="score2">0</span><em class="plus">+1</em></span>
+        </div>
+        <div class="prow">
+          <div class="hearts" id="hp2"></div>
+          <div class="ammo" id="ammo2" title="可再发射的子弹数（同时最多 4 颗在场上）"></div>
+        </div>
+        <div class="wchips" id="wpn2"></div>
+      </div>
+
+      <div class="pcard p3" id="pcard3" style="display:none">
+        <div class="prow">
+          <span class="tag">P3</span>
+          <span class="name">绿方</span>
+          <span class="sbox" id="box3"><span id="score3">0</span><em class="plus">+1</em></span>
+        </div>
+        <div class="prow">
+          <div class="hearts" id="hp3"></div>
+          <div class="ammo" id="ammo3" title="可再发射的子弹数（同时最多 4 颗在场上）"></div>
+        </div>
+        <div class="wchips" id="wpn3"></div>
+      </div>
+    </div>
+
+
+    <div class="board">
+      <canvas id="game"></canvas>
+      <div class="overlay" id="overlay">
+        <div class="panel">
+          <div class="kicker" id="ovKicker">双人游戏 · Duo Battle</div>
+          <h2 id="ovTitle">坦克动荡</h2>
+          <p id="ovDesc">炮口始终朝向车头，靠转向瞄准。<br />子弹会一直反弹（不限次数），小心自己的跳弹。<br />炮弹无限、每 8 秒自行消失，但同时最多 <b>4 颗</b>在场上（HUD 小弹头就是剩余弹药），两炮之间至少隔 0.35 秒。<br />每 15 秒从 <b>激光 / 护盾 / 地雷 / 霰弹枪 / 能量电子炮</b> 里随机刷一个道具。<br />双人游戏<b>没有隐身技能</b>。<br />每局结束自动续局并<b>随机换一张地图</b>（双人 4 张 / 三人 4 张），比分累积不封顶。</p>
+          <div class="keys" id="ovKeys">
+            <div class="card p1">
+              <b>红方 · P1</b>
+              <span><kbd>W</kbd><kbd>S</kbd> 前进 / 倒车</span>
+              <span><kbd>A</kbd><kbd>D</kbd> 左转 / 右转</span>
+              <span><kbd>空格</kbd> / <kbd>J</kbd> 开火</span>
+            </div>
+            <div class="card p2">
+              <b>蓝方 · P2</b>
+              <span><kbd>↑</kbd><kbd>↓</kbd> 前进 / 倒车</span>
+              <span><kbd>←</kbd><kbd>→</kbd> 左转 / 右转</span>
+              <span><kbd>/</kbd> / <kbd>小键盘 0</kbd> 开火</span>
+            </div>
+          </div>
+          <div class="hint" id="ovHint">点击<em>屏幕</em>开始对战</div>
+          <div class="panel-btns" id="ovBtns" hidden></div>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <div class="grp" id="footA"><span class="dot a"></span>W/S 行驶 · A/D 转向 · 空格开火</div>
+      <div class="grp" id="footB"><span class="dot b"></span>↑/↓ 行驶 · ←/→ 转向 · / 开火</div>
+      <div class="grp" id="footC"><kbd>P</kbd> 暂停 · <kbd>R</kbd> 重开并清空比分 · <kbd>M</kbd> 静音</div>
+    </footer>
+  </div>
+
+  <!-- 手机触屏操控：左摇杆（推向哪个方向，坦克就朝哪个方向开）+ 右开火 -->
+  <div class="touch-ui" id="touchUI">
+    <div class="stick" id="stickBase">
+      <div class="stick-ring"></div>
+      <svg class="stick-arrows" viewBox="0 0 100 100" aria-hidden="true">
+        <path d="M50 8 42 20h16z" fill="currentColor" />
+        <path d="M50 92 42 80h16z" fill="currentColor" />
+        <path d="M8 50 20 42v16z" fill="currentColor" />
+        <path d="M92 50 80 42v16z" fill="currentColor" />
+      </svg>
+      <div class="stick-knob" id="stickKnob"><i class="knob-dir" id="knobDir"></i></div>
+    </div>
+    <div class="pad-label" id="padLabel1">红方操控键</div>
+    <div class="btn-col">
+      <button class="skill-btn" id="invisBtn" type="button" aria-label="隐身">隐身</button>
+      <!-- 红方的血量 + 弹夹：挂在开火键左侧 -->
+      <div class="pad-stat" id="padStat1">
+        <div class="hearts" id="psHp1"></div>
+        <div class="ammo" id="psAmmo1"></div>
+      </div>
+      <button class="fire-btn" id="fireBtn" type="button" aria-label="开火">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="7.4" fill="none" stroke="currentColor" stroke-width="2.2" />
+          <circle cx="12" cy="12" r="2.6" fill="currentColor" />
+        </svg>
+        <span>开火</span>
+      </button>
+    </div>
+  </div>
+  <!-- 双人同屏：上侧玩家（蓝方 P2）的操作层，开火在左、摇杆在右 -->
+  <div class="touch-ui" id="touchUI2">
+    <div class="stick" id="stickBase2">
+      <div class="stick-ring"></div>
+      <svg class="stick-arrows" viewBox="0 0 100 100" aria-hidden="true">
+        <path d="M50 8 42 20h16z" fill="currentColor" />
+        <path d="M50 92 42 80h16z" fill="currentColor" />
+        <path d="M8 50 20 42v16z" fill="currentColor" />
+        <path d="M92 50 80 42v16z" fill="currentColor" />
+      </svg>
+      <div class="stick-knob" id="stickKnob2"><i class="knob-dir" id="knobDir2"></i></div>
+    </div>
+    <div class="pad-label" id="padLabel2">蓝方操控键</div>
+    <div class="btn-col">
+      <button class="skill-btn" id="invisBtn2" type="button" aria-label="隐身">隐身</button>
+      <button class="fire-btn" id="fireBtn2" type="button" aria-label="开火">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="7.4" fill="none" stroke="currentColor" stroke-width="2.2" />
+          <circle cx="12" cy="12" r="2.6" fill="currentColor" />
+        </svg>
+        <span>开火</span>
+      </button>
+      <!-- 蓝方的血量 + 弹夹：挂在开火键右侧，整体 180° 倒转（上侧玩家倒着看才是正的） -->
+      <div class="pad-stat flip" id="padStat2">
+        <div class="hearts" id="psHp2"></div>
+        <div class="ammo" id="psAmmo2"></div>
+      </div>
+    </div>
+  </div>
+  <!-- 双人同屏时才出现：左侧空白挂两排比分（上排倒转给蓝方看，下排正着给红方看） -->
+  <div class="duel-scores" id="duelScores" aria-hidden="true">
+    <div class="ds-card flip" id="dsCardB"></div>
+    <div class="ds-card" id="dsCardA"></div>
+  </div>
+  <!-- 双人同屏时才出现：贴在画面右侧的空白处，用来退出 / 暂停 -->
+  <button class="duel-home" id="btnHomeDuel" type="button" aria-label="返回主界面">主界面</button>
+  <div class="duel-tip" id="duelTip">此模式推荐平板操作<em>（点此关闭）</em></div>
+  <div class="touch-hint">
+    <b>摇杆</b> 推向哪个方向，坦克就转过去往那开，推得越远越快<br />
+    <b>开火</b> <span id="touchWeapons">按住使用手上的武器（激光 / 地雷 / 霰弹 / 电子炮 / 普通弹）</span><br />
+    <span id="touchInvisTip"><b>隐身</b> 5 秒隐身，冷却 20 秒</span>
+  </div>
+  <div class="rotate-tip">建议横屏游玩</div>
+
+  <script src="net.js"></script>
+  <script src="game.js"></script>
+  <script src="lobby.js"></script>
+</body>
+</html>
