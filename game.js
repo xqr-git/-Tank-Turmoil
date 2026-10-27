@@ -1680,12 +1680,14 @@
 
   /* =========================================================
    * 6.5 到目标的最短路线：BFS 距离场 + 视线跳点
-   *   从目标格做一次四向 BFS，得到「每格到目标还有几步」的距离场；顺着距离递减的
-   *   方向走天生就是最短路线，再把共线的格子用视线合并成折线，走起来才不会一格
-   *   一格地蹭墙角。折线每 0.05 秒整条重建、直接顶掉旧的——玩家一动，上一条路线
-   *   就作废了，绝不让旧路线拖着车往回跑。
+   *   从目标格做一次八向 BFS（斜着走也行，但不许贴着墙角斜穿），得到「每格到目标
+   *   还有几步」的距离场；顺着距离递减的方向走天生就是最短路线，再把共线的格子用
+   *   视线合并成折线——横的竖的斜的都能并成一段直路。折线每 0.05 秒整条重建、
+   *   直接顶掉旧的——玩家一动，上一条路线就作废了，绝不让旧路线拖着车往回跑。
    * ======================================================= */
   const AI_ROUTE_GAP = 0.05;      // 重建路线的间隔（秒）
+  // 八个方向：前四个横平竖直，后四个斜线（斜向要求两个相邻直行格都通，见下面过滤）
+  const AI_DIRS = [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]];
   const AI_LOOK = 2.0;            // 威胁预测窗口：未来 2 秒
   const AI_REACT = 0.22;          // 看见子弹到动方向盘的反应时间
   const AI_EVADE_T = 0.9;         // 预测命中落在这个时间内 → 立刻闪身
@@ -1720,17 +1722,17 @@
         const cx = cur % COLS;
         const cy = (cur - cx) / COLS;
         const nd = f[cur] + 1;
-        if (cx + 1 < COLS && !WALL[cy][cx + 1] && f[cy * COLS + cx + 1] === -1) {
-          f[cy * COLS + cx + 1] = nd; q.push(cy * COLS + cx + 1);
-        }
-        if (cx - 1 >= 0 && !WALL[cy][cx - 1] && f[cy * COLS + cx - 1] === -1) {
-          f[cy * COLS + cx - 1] = nd; q.push(cy * COLS + cx - 1);
-        }
-        if (cy + 1 < ROWS && !WALL[cy + 1][cx] && f[(cy + 1) * COLS + cx] === -1) {
-          f[(cy + 1) * COLS + cx] = nd; q.push((cy + 1) * COLS + cx);
-        }
-        if (cy - 1 >= 0 && !WALL[cy - 1][cx] && f[(cy - 1) * COLS + cx] === -1) {
-          f[(cy - 1) * COLS + cx] = nd; q.push((cy - 1) * COLS + cx);
+        for (let d = 0; d < 8; d++) {
+          const dc = AI_DIRS[d][0];
+          const dr = AI_DIRS[d][1];
+          const nx = cx + dc;
+          const ny = cy + dr;
+          if (nx < 0 || ny < 0 || nx >= COLS || ny >= ROWS) continue;
+          if (WALL[ny][nx] || f[ny * COLS + nx] !== -1) continue;
+          // 斜穿的必要条件：两条直行邻格都得是空的，否则就是贴着墙角蹭过去
+          if (dc !== 0 && dr !== 0 && (WALL[cy][nx] || WALL[ny][cx])) continue;
+          f[ny * COLS + nx] = nd;
+          q.push(ny * COLS + nx);
         }
       }
     }
@@ -1758,10 +1760,18 @@
       let bestD = here;
       let bc = -1;
       let br = -1;
-      if (cc + 1 < COLS) { const d = f[cr * COLS + cc + 1]; if (d >= 0 && d < bestD) { bestD = d; bc = cc + 1; br = cr; } }
-      if (cc - 1 >= 0) { const d = f[cr * COLS + cc - 1]; if (d >= 0 && d < bestD) { bestD = d; bc = cc - 1; br = cr; } }
-      if (cr + 1 < ROWS) { const d = f[(cr + 1) * COLS + cc]; if (d >= 0 && d < bestD) { bestD = d; bc = cc; br = cr + 1; } }
-      if (cr - 1 >= 0) { const d = f[(cr - 1) * COLS + cc]; if (d >= 0 && d < bestD) { bestD = d; bc = cc; br = cr - 1; } }
+      for (let d = 0; d < 8; d++) {
+        const dc = AI_DIRS[d][0];
+        const dr = AI_DIRS[d][1];
+        const nx = cc + dc;
+        const ny = cr + dr;
+        if (nx < 0 || ny < 0 || nx >= COLS || ny >= ROWS) continue;
+        if (WALL[ny][nx]) continue;
+        // 和 BFS 同一条规矩：斜穿不许贴墙角
+        if (dc !== 0 && dr !== 0 && (WALL[cr][nx] || WALL[ny][cc])) continue;
+        const dd = f[ny * COLS + nx];
+        if (dd >= 0 && dd < bestD) { bestD = dd; bc = nx; br = ny; }
+      }
       if (bc < 0) break;
       cc = bc;
       cr = br;
@@ -3155,6 +3165,15 @@
         state: aiSt.state,                    // free = 未受威胁 / dodge = 躲避
         route: aiSt.pathLen,
         routePts: aiSt.route.pts.length,      // 当前路线折线有几个点
+        diagSegs: (function () {              // 路线里斜着走的段数（验证斜线寻路用）
+          let n = 0;
+          for (let i = 1; i < aiSt.route.pts.length; i++) {
+            const dx = Math.abs(aiSt.route.pts[i].x - aiSt.route.pts[i - 1].x);
+            const dy = Math.abs(aiSt.route.pts[i].y - aiSt.route.pts[i - 1].y);
+            if (dx > 4 && dy > 4) n++;
+          }
+          return n;
+        })(),
         replans: aiSt.replans,                // 一共重建过几次路线
         backing: aiSt.backing,                // 这一帧在不在倒车
         dd: aiSt.dodgeDir === null ? null : r2(aiSt.dodgeDir),   // 躲的方向
