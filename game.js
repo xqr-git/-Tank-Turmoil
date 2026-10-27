@@ -116,6 +116,110 @@
         '#.......................#',
         '#########################',
       ]
+    },
+    {
+      name: '回廊迷宫',
+      spawns: [
+        { c: 2, r: 8, a: 0 },
+        { c: 22, r: 8, a: Math.PI }
+      ],
+      rows: [
+        '#########################',
+        '#.....................###',
+        '#..##.#.###.###.#.#.#...#',
+        '#...#.#.......#...#...###',
+        '#...#.#####...#.#.....###',
+        '#.#...#...#.......#.#.###',
+        '#.#.###.#.#.##.##...#.###',
+        '#.......#...............#',
+        '#...##.####.#.####.##...#',
+        '#...........#...........#',
+        '#..####.#.#####....##..##',
+        '#.....#.#.....#...#...###',
+        '#####.#...###.##.##.#.###',
+        '#...........#.........###',
+        '#.###.####..#.#######.###',
+        '##########.##############',
+        '#########################'
+      ]
+    },
+    {
+      name: '蜂巢迷径',
+      spawns: [
+        { c: 2, r: 8, a: 0 },
+        { c: 22, r: 8, a: Math.PI }
+      ],
+      rows: [
+        '#########################',
+        '#.......#..............##',
+        '###..##...#....#.##.#..##',
+        '#...#...............#.###',
+        '###.#.##.#.##..##.#.#..##',
+        '#...#.#.....#.....#...###',
+        '#.#.#...#.#.#.##..###.###',
+        '#...#.......#...#.......#',
+        '#...#####...#.#.#.###...#',
+        '#.........#...#.....#...#',
+        '#.....##.######..##...###',
+        '#.....#.......#........##',
+        '#...###.##..#..##...#..##',
+        '#.................#...###',
+        '#.#####.#####..#.####...#',
+        '##############.#.########',
+        '#########################'
+      ]
+    },
+    {
+      name: '断壁曲巷',
+      spawns: [
+        { c: 2, r: 8, a: 0 },
+        { c: 22, r: 8, a: Math.PI }
+      ],
+      rows: [
+        '#########################',
+        '#.#....................##',
+        '#...#...##..##..#.##...##',
+        '#.....#.#...#..........##',
+        '#..###..#.#...#####..####',
+        '#...............#.#.#..##',
+        '####..####..#.#.#.#.#..##',
+        '#...#.....#.....#.......#',
+        '#...#..#.#..##.##.###...#',
+        '#...................#...#',
+        '#.###.#.###.###..#..#..##',
+        '#...#.#...#.........#.###',
+        '#.#..####.#.#.#.....#.###',
+        '#.#.........#.....#....##',
+        '##..#..#..###.###########',
+        '#########################',
+        '#########################'
+      ]
+    },
+    {
+      name: '九曲回廊',
+      spawns: [
+        { c: 2, r: 8, a: 0 },
+        { c: 22, r: 8, a: Math.PI }
+      ],
+      rows: [
+        '#########################',
+        '#...#.................###',
+        '##..####.####.#..#..#.###',
+        '#.#...#.......#.......###',
+        '#.##.....####.#.#.#.##..#',
+        '#.......#.......#......##',
+        '#.#.#.###.#.#.###.##...##',
+        '#.........#.#.....#.....#',
+        '#...#.#####..###.##.....#',
+        '#...#.....#.....#...#...#',
+        '#.#.#.##...####.......###',
+        '#...#.......#...#.#.#.###',
+        '#.##..#.#.##..#.###.#.###',
+        '#.......#...........#.###',
+        '##.##.#.#####..##..######',
+        '##.######################',
+        '#########################'
+      ]
     }
   ];
 
@@ -226,6 +330,114 @@
         '#.......................#',
         '#.......................#',
         '#########################',
+      ]
+    },
+    {
+      name: '三方迷宫',
+      spawns: [
+        { c: 2, r: 8, a: 0 },
+        { c: 22, r: 8, a: Math.PI },
+        { c: 12, r: 14, a: -Math.PI / 2 }
+      ],
+      rows: [
+        '#########################',
+        '#...#.....#...........###',
+        '###.#.#.###.#..####...###',
+        '#.....#.....#...#.....###',
+        '#.##.########.....#.##.##',
+        '#.....#.....#...#.#....##',
+        '#####.#.#.#.......#...###',
+        '#.....#.#.....#.#...#...#',
+        '#....##.###.##..#...#...#',
+        '#...............#.#.....#',
+        '#.###.#.#.#..###..#.#..##',
+        '#...#...#.#.#...#.....###',
+        '###...###.#.#.#...#.#.###',
+        '#.........#...#........##',
+        '######.###....#.#########',
+        '###########...###########',
+        '#########################'
+      ]
+    },
+    {
+      name: '交错回廊',
+      spawns: [
+        { c: 2, r: 8, a: 0 },
+        { c: 22, r: 8, a: Math.PI },
+        { c: 12, r: 14, a: -Math.PI / 2 }
+      ],
+      rows: [
+        '#########################',
+        '#...#...............#.###',
+        '###.##..###########...###',
+        '#.#...#.#.....#...#.#.###',
+        '#.###.#.#.###.#.###.#.###',
+        '#...#.#...#.#.#...#.#.###',
+        '#..##.#.##..#.##..#.#.###',
+        '#...........#...#.#.....#',
+        '#....#..#.#.#.....#.#...#',
+        '#...#...#...#...#.......#',
+        '##..#.#.#.##..###..#.####',
+        '#...#.#.#.#.....#.#....##',
+        '#..#..#.###.###.#.###.###',
+        '#.....#...............###',
+        '#######.###...####.######',
+        '###########...###########',
+        '#########################'
+      ]
+    },
+    {
+      name: '迷径哨站',
+      spawns: [
+        { c: 2, r: 8, a: 0 },
+        { c: 22, r: 8, a: Math.PI },
+        { c: 12, r: 14, a: -Math.PI / 2 }
+      ],
+      rows: [
+        '#########################',
+        '#.........#.....#.....###',
+        '#######.#.##..#.#.#..####',
+        '#...#.......#.........###',
+        '#.###.#.###.####.#.##..##',
+        '#...#.#...#...#.....#.###',
+        '#.#.#.#.#.###.#.###.#.###',
+        '#.....#.#...#.....#.....#',
+        '#...###..##.#.#.#..##...#',
+        '#.......#...#.#.#.......#',
+        '#.#...###..##.####..#..##',
+        '#.#.#.#...#...#...#.#.###',
+        '#.#.###.#....##....#..###',
+        '#.#.............#.....###',
+        '#########.....###########',
+        '###########....##########',
+        '#########################'
+      ]
+    },
+    {
+      name: '环形迷巷',
+      spawns: [
+        { c: 2, r: 8, a: 0 },
+        { c: 22, r: 8, a: Math.PI },
+        { c: 12, r: 14, a: -Math.PI / 2 }
+      ],
+      rows: [
+        '#########################',
+        '#...#.........#...#...###',
+        '###.#...#.#.#.#.#.#.#.###',
+        '#...#.#.#...........#.###',
+        '#.#.....####.##.###.#.###',
+        '#.#.#.#.#.....#.#...#.###',
+        '#.#.#.....#.###.#...#.#.#',
+        '#.....#.#.#...#...#.#...#',
+        '#.....#.#.###..#.#..#...#',
+        '#...#...#...#.....#.....#',
+        '#.#.#.#.#.#.###.#####..##',
+        '#...#.#.......#.....#.###',
+        '#.###.#.####..##..##..###',
+        '#.....................###',
+        '#####.##.#.....#.#...####',
+        '###########...###########',
+        '#########################'
       ]
     }
   ];
@@ -1538,12 +1750,9 @@
 
   /* =========================================================
    * 6.4 难度档位
-   *   手感参数全部集中在这张表里：四个档位只改数值、不改代码。
-   *   最高档「莱卡」是按 TankTrouble 官方开发者（Subterranean Software）
-   *   公开的做法调的——前方 230° 打 23 条射线、最多预判 2 次反弹、
-   *   瞄准之后几乎不停顿就开火、开火间隔压到最短、绝不故意打偏。
-   *   官方那套数值跑在 30Hz、弹速也和我们不同，所以「秒数」是按同样的
-   *   压制感换算过来的，射线数 / 张角 / 反弹层数则照原样保留。
+   *   手感参数全部集中在这张表里：三个档位只改数值、不改代码。
+   *   简单 / 中等 / 极难：反应延迟、瞄准容差、射线数、反弹层数、故意打偏率
+   *   逐档收紧；越往上越不会「手滑」。
    *   注意：这一套对电脑版、手机版 / 平板都是同一份，AI 里没有任何按设备
    *   类型或操作方式分支的逻辑——触屏只是换了玩家自己的输入方式。
    * ======================================================= */
@@ -1563,7 +1772,8 @@
       hesitate: 0.34,  // 看见机会却不开枪的概率
       shotCd: 0.35,    // 多久重算一次弹道
       keepMin: 170, keepMax: 340, grabRange: 200,
-      dodgeErr: 0.45,  // 两侧都能躲时躲错边的概率
+      planT: 1.20,     // 躲避规划往前看多久（秒）——越短越容易看漏下一次反弹
+      canBack: false,  // 会不会用「倒着拐」躲（不会的话大角度转身就来不及）
       burst: 1, burstGap: 0.30
     },
     normal: {
@@ -1581,7 +1791,8 @@
       hesitate: 0.16,
       shotCd: 0.20,
       keepMin: 150, keepMax: 320, grabRange: 340,
-      dodgeErr: 0.25,
+      planT: 1.75,
+      canBack: true,
       burst: 2, burstGap: 0.15
     },
     hard: {
@@ -1599,29 +1810,12 @@
       hesitate: 0.02,
       shotCd: 0.12,
       keepMin: 110, keepMax: 250, grabRange: 430,
-      dodgeErr: 0.06,
+      planT: 2.50,
+      canBack: true,
       burst: 2, burstGap: 0.12
-    },
-    laika: {
-      key: 'laika', name: '莱卡', tag: '官方AI同款',
-      blurb: '照官方莱卡调：230° 打 23 条射线、预判 2 次反弹',
-      waitMap: 0.25,
-      react: 0.05,          // 官方：几乎零反应延迟（只有开局 Wait After Map）
-      aimTol: 0.010,
-      jitter: 0.008,        // 官方：不故意打偏，所以只剩极小的机械误差
-      jitterHold: 0.15,
-      arcRays: 23, arcSpan: 230, bounces: 2,   // 官方：230° / 23 条射线 / 预判 2 次反弹
-      lineup: 0.02,
-      refire: 0.26,
-      miss: 0, missMag: 0,  // 官方：Hard 以上不再故意打偏
-      hesitate: 0,
-      shotCd: 0.08,
-      keepMin: 65, keepMax: 205, grabRange: 480,
-      dodgeErr: 0,
-      burst: 3, burstGap: 0.09
     }
   };
-  const AI_ORDER = ['easy', 'normal', 'hard', 'laika'];
+  const AI_ORDER = ['easy', 'normal', 'hard'];
   let aiDiff = 'normal';
 
   // 记住上次选的难度（隐私模式 / 本地文件打开时 localStorage 可能不可用，忽略即可）
@@ -1676,12 +1870,16 @@
     inT: -1,             // 最近一颗会命中自己的子弹还有多久到（-1 = 没有）
     inBounces: 0,
     reactT: 0,           // 发现威胁后已经「反应」了多久（人类不是零延迟）
+    calmT: 0,            // 连续多久没有威胁（够久才把反应延迟清零）
     aimHold: 0,          // 炮口对上之后稳了多久（够 lineup 才扣扳机）
     shotsFired: 0,       // 这一局一共打了几发（含故意打偏的，用来量命中率）
     shotsMissed: 0,      // 其中「故意打偏」的几发
     waitT: 0,            // 开局发呆计时（官方 Wait After Map）
-    dodgeDir: null,
-    dodgeT: 0,
+    planDir: null,       // 躲避规划选的方向
+    planBack: false,     // 这条躲避路线是倒车还是朝前开
+    planStill: false,    // 选的是「站着别动」
+    planT: 0,            // 下一次重算还有多久
+    planClear: 0,        // 这条路线的最小余量（调试 / 测试用）
     mode: 'idle'
   };
 
@@ -1708,7 +1906,8 @@
       keepMin: tier.keepMin,
       keepMax: tier.keepMax,
       grabRange: tier.grabRange,
-      dodgeErr: tier.dodgeErr,
+      planT: tier.planT,
+      canBack: tier.canBack,
       burst: tier.burst,
       burstGap: tier.burstGap,
       fireGap: tier.refire       // 旧字段（霰弹枪当间隔用），跟档位一起走
@@ -1749,8 +1948,11 @@
     aiSt.shotsFired = 0;
     aiSt.shotsMissed = 0;
     aiSt.waitT = aiCfg.waitMap;
-    aiSt.dodgeDir = null;
-    aiSt.dodgeT = 0;
+    aiSt.planDir = null;
+    aiSt.planBack = false;
+    aiSt.planStill = false;
+    aiSt.planT = 0;
+    aiSt.planClear = 0;
     aiSt.mode = 'idle';
     if (tanks[1]) {
       aiSt.lastX = tanks[1].x;
@@ -2086,7 +2288,7 @@
   }
 
   // 模拟「从 (x,y) 沿 angle 打一发」：会不会命中 target、多久命中、弹了几次
-  //   opt.maxBounce：最多允许弹几次（难度档位决定，莱卡档 2 次）
+  //   opt.maxBounce：最多允许弹几次（难度档位决定，极难档 2 次）
   //   opt.avoid：这发子弹不许打到的东西（通常是自己）——沿途一旦擦到就整条作废，
   //             对应官方那条「射线贴自己太近就放弃」的红线
   function aiSimShot(x, y, angle, target, opt) {
@@ -2135,7 +2337,10 @@
   }
 
   // 一颗已经在飞的子弹，多久会打中 target（不会命中返回 null）
-  function aiSimThreat(b, target, maxT) {
+  //   pad：把目标想象得比实际大一圈——擦身而过的子弹也算进来，
+  //   否则「差 1px 打中 / 差 1px 打不中」会让预测每隔几十毫秒翻一次脸。
+  function aiSimThreat(b, target, maxT, pad) {
+    pad = pad || 0;
     const speed = Math.hypot(b.vx, b.vy) || BULLET_SPEED;
     const rad = b.r || BULLET_R;
     const dt = AI_SIM_STEP / speed;
@@ -2148,7 +2353,7 @@
     let bounces = 0;
     while (t < maxT) {
       t += dt;
-      if (aiRectDist(px, py, target) <= rad) return { t: t, bounces: bounces };
+      if (aiRectDist(px, py, target) <= rad + pad) return { t: t, bounces: bounces };
       const nx = px + vx * dt;
       if (rectHitsWall(nx, py, rad)) {
         if (maxBounce <= 0) return null;
@@ -2171,30 +2376,44 @@
     return null;
   }
 
-  /* 未来 2 秒内会不会有子弹打中自己？返回最快命中的那一颗（null = 安全）。
-     这就是「未受威胁状态 / 躲避状态」的判决依据。 */
-  function aiIncoming(me) {
-    let best = null;
-    let sims = 0;
+  /* 未来 2 秒内会有哪些子弹打中自己？按命中时间从早到晚排好。
+     这就是「未受威胁状态 / 躲避状态」的判决依据。
+     注意：自己的跳弹也算——它绕一圈弹回来一样会把自己打掉血。 */
+  function aiThreats(me, maxN) {
+    const out = [];
     const reach = 30 + BULLET_SPEED * AI_LOOK;
+    let sims = 0;
     for (let i = 0; i < bullets.length; i++) {
       const b = bullets[i];
-      if (b.owner === me.id) continue;
       if (b.life <= 0.05) continue;
+      const mine = b.owner === me.id;
+      if (mine) {
+        // 关掉自伤时自己的子弹永远不是威胁；刚出膛的这颗对车主还免疫着
+        if (!SELF_DAMAGE) continue;
+        if ((b.age || 0) < SELF_IMMUNE + 0.05) continue;
+      }
       if (Math.hypot(b.x - me.x, b.y - me.y) > reach) continue;
-      if (sims >= 8) break;          // 每帧最多细算 8 颗，别把帧率吃光
+      if (sims >= 10) break;         // 每帧最多细算 10 颗，别把帧率吃光
       sims++;
       const span = Math.min(b.life || BULLET_LIFE, AI_LOOK);
-      const r = aiSimThreat(b, me, span);
+      // 自己的跳弹给小一点的余量：不然每开一炮都要躲自己那颗，压不上去
+      const r = aiSimThreat(b, me, span, mine ? AI_THREAT_PAD_OWN : AI_THREAT_PAD);
       if (!r) continue;
-      if (!best || r.t < best.t) best = { b: b, t: r.t, bounces: r.bounces };
+      out.push({ b: b, t: r.t, bounces: r.bounces, mine: mine });
     }
-    return best;
+    if (out.length > 1) out.sort(function (a1, a2) { return a1.t - a2.t; });
+    return out.length > maxN ? out.slice(0, maxN) : out;
+  }
+
+  // 只要「最快命中的那一颗」
+  function aiIncoming(me) {
+    const list = aiThreats(me, 1);
+    return list.length ? list[0] : null;
   }
 
   /* 找一条能打中玩家的炮口方向（允许借墙反弹）。
-   *   做法照着 TankTrouble 官方的莱卡：以「玩家方向」为中心打一个扇形射线束，
-   *   射线数、张角、能预判几层反弹都由难度档位决定（莱卡档就是官方那套 230° / 23 条 / 2 层）。
+   *   做法：以「玩家方向」为中心打一个扇形射线束，射线数、张角、能预判几层
+   *   反弹都由难度档位决定（极难档是 270° / 31 条 / 2 层）。
    *   射线之间有空隙，所以命中之后再在最优点附近细扫一遍，避免「差一点点」漏掉。
    *   命中时间越短、反弹次数越少越优先。 */
   function aiFindShot(me, foe) {
@@ -2240,9 +2459,9 @@
 
     // 瞄准不是完美的：档位决定漂移多大
     best.angle += aiSt.err * 0.6 + (Math.random() * 2 - 1) * aiCfg.jitter * 0.35;
-    // 看见机会却犹豫一下（越难越少，莱卡档为 0）
+    // 看见机会却犹豫一下（越难越少，极难档几乎没有）
     if (aiCfg.hesitate > 0 && Math.random() < aiCfg.hesitate) return null;
-    // 故意打偏：官方在简单档给到 50%，越难越少，莱卡档完全没有
+    // 故意打偏：简单档 50%，中等 14%，极难 3%
     if (aiCfg.miss > 0 && Math.random() < aiCfg.miss) {
       best.angle += (Math.random() < 0.5 ? -1 : 1) * aiCfg.missMag * (0.6 + Math.random() * 0.8);
       best.missed = true;
@@ -2329,80 +2548,206 @@
     return best;
   }
 
-  /* ---- 躲避：先算「往哪边能让开弹道」，再决定是朝前打方向还是倒车带转向 ---- */
+  /* =========================================================
+   * 6.7 躲避规划
+   *   老版本只会「垂直于弹道往两侧挑一个」：路够宽时够用，但在 5×5 这种四周
+   *   全是墙的小方厅里就废了——垂直方向常常一边是墙，另一边也只剩十几像素，
+   *   子弹弹回来正好撞上。
+   *   现在的做法是把「子弹会怎么飞」和「自己还能怎么走」放在一起算：
+   *     1) 每颗有威胁的子弹按真实步进（3px / 步、X / Y 分别反弹）外推到 2.2 秒，
+   *        存成轨迹采样点；
+   *     2) 枚举 16 个方向 × 前进 / 倒车，外加「站着不动」，用「先转向、再直行、
+   *        撞墙就停」估算自己的轨迹（转向速度、前进倒车速度全都是真实值）；
+   *     3) 两条轨迹逐时刻算「车身到子弹的距离」，取最小余量最大的那个动作；
+   *     4) 上一次选的路还安全就接着走（避免左右抽搐），朝玩家的方向给一点
+   *        加分（安全的时候顺手压上去，不会躲着躲着忘了进攻）。
+   *   于是它不只是「让开这一发」，而是会提前挪到子弹打不到的角落等着。
+   * ======================================================= */
+  const AI_PLAN_T = 2.5;        // 躲避规划往前看多久（秒，档位会用 aiCfg.planT 覆盖）
+  const AI_TRACK_STEP = 3;      // 弹道外推的步长（px，和真实子弹一致）
+  const AI_TRACK_KEEP = 3;      // 每 3 步留一个采样点（约 0.027 秒）
+  const AI_ESCAPE_N = 16;       // 候选方向数
+  const AI_ESCAPE_MARGIN = 1.5; // 车身和子弹之间希望留出的余量
+  const AI_THREAT_PAD = 12;     // 判定威胁时把车放大一圈：擦身而过也算危险，别等弹道正中才躲
+  const AI_SHOOT_T = 0.55;      // 威胁还有这么久以上，才允许停下来先打一炮
+  const AI_THREAT_PAD_OWN = 5;  // 自己的跳弹只按「真要打中」算，别把它当大敌
 
-  // 朝逃生方向动：方向在身后（转过去太慢）就倒车带转向，否则朝前开
-  function aiEvadeGo(me, dir) {
-    const err = Math.abs(wrapPi(dir - me.angle));
-    if (err > 1.95) aiBackTo(me, dir);
-    else aiAim(me, dir, 1);
+  // 把一颗子弹按真实物理外推：返回扁平数组 [x, y, t, x, y, t, ...]
+  function aiBulletTrack(b, span) {
+    const speed = Math.hypot(b.vx, b.vy) || BULLET_SPEED;
+    const rad = b.r || BULLET_R;
+    const dt = AI_TRACK_STEP / speed;
+    const maxBounce = (b.maxBounce === undefined || b.maxBounce === null) ? MAX_BOUNCE : b.maxBounce;
+    let px = b.x;
+    let py = b.y;
+    let vx = b.vx;
+    let vy = b.vy;
+    let t = 0;
+    let bounces = 0;
+    let n = 0;
+    const out = [];
+    while (t < span) {
+      t += dt;
+      if ((n++ % AI_TRACK_KEEP) === 0) out.push(px, py, t);
+      const nx = px + vx * dt;
+      if (rectHitsWall(nx, py, rad)) {
+        if (bounces >= maxBounce) break;
+        vx = -vx;
+        bounces++;
+      } else {
+        px = nx;
+      }
+      const ny = py + vy * dt;
+      if (rectHitsWall(px, ny, rad)) {
+        if (bounces >= maxBounce) break;
+        vy = -vy;
+        bounces++;
+      } else {
+        py = ny;
+      }
+      if (px < -8 || py < -8 || px > W + 8 || py > H + 8) break;
+    }
+    return out;
   }
 
-  function aiEvade(me, threat, dt) {
-    // 已经选好方向就先跑完这 0.24 秒，免得每帧改主意、原地抽搐
-    if (aiSt.dodgeDir !== null && aiSt.dodgeT > 0) {
-      aiSt.dodgeT -= dt;
-      aiEvadeGo(me, aiSt.dodgeDir);
-      return;
-    }
+  // 这一档能往前算多久
+  function planHorizon() {
+    const h = aiCfg.planT;
+    return (h && h > 0.3) ? h : AI_PLAN_T;
+  }
 
-    const b = threat.b;
-    const axis = Math.atan2(b.vy, b.vx);
-    const rad = b.r || BULLET_R;
-    const need = TANK_HALF + rad + 6;                    // 至少要挪出这么多才离开弹道
-    const probe = Math.max(need * 2.2, TILE * 1.15);
-    const span = Math.min(b.life || BULLET_LIFE, AI_LOOK);
+  // 照着上一次算出来的躲避动作做（每帧都要执行，但不必每帧重算）
+  function aiEscapeExec(me) {
+    if (aiSt.planDir === null || aiSt.planStill) { aiAim(me, me.angle, 0); return; }
+    if (aiSt.planBack) aiBackTo(me, aiSt.planDir);
+    else aiAim(me, aiSt.planDir, 1);
+  }
 
-    // 把车「放」到候选落点上再模拟一次这颗子弹：还会被打中就不算安全
-    const safeAt = function (a) {
-      const gx = me.x + Math.cos(a) * probe;
-      const gy = me.y + Math.sin(a) * probe;
-      if (rectHitsWall(gx, gy, TANK_HALF)) return false;
-      return !aiSimThreat(b, { x: gx, y: gy }, span);
-    };
+  /* 一条候选动作的得分：把「照着这条动作开」的轨迹按真实物理推演一遍，
+     再逐时刻看车身离子弹最近能有多近（clear）。分数越高越安全。
 
-    // 候选：垂直弹道两侧最快；被墙挡住时再考虑顺着 / 逆着弹道跑
-    const dirs = [axis + Math.PI / 2, axis - Math.PI / 2, axis + Math.PI, axis];
-    const cands = [];
-    for (let i = 0; i < dirs.length; i++) {
-      const a = wrapPi(dirs[i]);
-      if (safeAt(a)) cands.push(a);
-    }
-
-    if (!cands.length) {
-      // 四面都不安全：顺着弹道方向跑，多拖一点时间，顺手让车尾先离开线路
-      aiSt.dodgeDir = wrapPi(axis);
-      aiSt.dodgeT = 0.18;
-      aiEvadeGo(me, aiSt.dodgeDir);
-      return;
-    }
-
-    // 转向越少越优先（威胁可能只剩零点几秒，少转半圈就是多一条命）
-    let pick = null;
-    // 同一颗子弹继续躲的时候别改主意：上一帧选的那侧还安全就接着走
-    if (aiSt.dodgeDir !== null) {
-      for (let i = 0; i < cands.length; i++) {
-        if (Math.abs(wrapPi(cands[i] - aiSt.dodgeDir)) < 0.35) { pick = cands[i]; break; }
+     推演用的是和游戏里一模一样的规则：
+       · 摇杆模式（朝前）：车头按 5.6 rad/s 转向目标方向，只有对准了才加速；
+       · 倒车模式：车头按 3.0 rad/s 转向「目标方向的反面」，车立刻以 84px/s
+         沿车尾方向动起来——所以大角度逃跑时倒车比掉头快得多，这一点必须算进去；
+       · 撞墙按 X / Y 两轴分别判，撞上就停（和 tryMove 一致）。 */
+  function aiPlanScore(me, tracks, dir, back, still, wantDir) {
+    const dtS = 0.02;
+    const steps = Math.round(planHorizon() / dtS);
+    const wantNose = back ? wrapPi(dir + Math.PI) : dir;
+    let a = me.angle;
+    let x = me.x;
+    let y = me.y;
+    let clear = 1e9;
+    let turnLeft = still ? 0 : Math.abs(wrapPi(wantNose - me.angle));
+    for (let s = 0; s < steps; s++) {
+      const t = (s + 1) * dtS;
+      if (!still) {
+        // 转向
+        const rate = back ? TANK_TURN : TANK_TURN_STICK;
+        const mx = rate * dtS;
+        const e = wrapPi(wantNose - a);
+        const step = e > mx ? mx : (e < -mx ? -mx : e);
+        a += step;
+        if (turnLeft > 0) turnLeft = Math.max(0, turnLeft - Math.abs(step));
+        // 位移
+        if (back) {
+          const d = TANK_BACK_SPEED * dtS;
+          const nx = x + Math.cos(a + Math.PI) * d;
+          if (!rectHitsWall(nx, y, TANK_HALF)) x = nx;
+          const ny = y + Math.sin(a + Math.PI) * d;
+          if (!rectHitsWall(x, ny, TANK_HALF)) y = ny;
+        } else {
+          const align = Math.cos(wrapPi(wantNose - a));
+          if (align > 0.02) {
+            const d = TANK_SPEED * align * dtS;
+            const nx = x + Math.cos(a) * d;
+            if (!rectHitsWall(nx, y, TANK_HALF)) x = nx;
+            const ny = y + Math.sin(a) * d;
+            if (!rectHitsWall(x, ny, TANK_HALF)) y = ny;
+          }
+        }
+      }
+      // 这一刻离每颗子弹多远
+      for (let k = 0; k < tracks.length; k++) {
+        const tr = tracks[k];
+        const bi = Math.round(t / tr.dt) * 3;
+        if (bi >= tr.pts.length) continue;
+        const bx = tr.pts[bi];
+        const by = tr.pts[bi + 1];
+        const qx = x - TANK_HALF < bx ? (x + TANK_HALF > bx ? bx : x + TANK_HALF) : x - TANK_HALF;
+        const qy = y - TANK_HALF < by ? (y + TANK_HALF > by ? by : y + TANK_HALF) : y - TANK_HALF;
+        const gap = Math.hypot(bx - qx, by - qy) - tr.r - AI_ESCAPE_MARGIN;
+        if (gap < clear) {
+          clear = gap;
+          if (clear < -30) {          // 已经注定要挨打，这条不用再算了
+            return { clear: clear, score: -1e6, turnT: 0, cap: 0 };
+          }
+        }
       }
     }
-    if (pick === null) {
-      cands.sort(function (a1, a2) {
-        return Math.abs(wrapPi(a1 - me.angle)) - Math.abs(wrapPi(a2 - me.angle));
-      });
-      // 两侧都能躲时偶尔判断失误、挑了绕远的那边——给玩家留出可乘之机
-      pick = (cands.length > 1 && Math.random() < aiCfg.dodgeErr) ? cands[1] : cands[0];
-    }
-    aiSt.dodgeDir = pick;
-    aiSt.dodgeT = 0.3;
-    aiEvadeGo(me, pick);
+    let safe = clear > 30 ? 30 : clear;   // 够安全就封顶，别让远处的安全感压过「顺手推进」
+    let score = safe - 0.18 * turnLeft;
+    if (still) score -= 1.2;
+    else if (back) score -= 0.25;
+    if (wantDir !== null && !still) score += 2.0 * Math.cos(wrapPi(dir - wantDir));
+    return { clear: clear, score: score, turnT: 0, cap: 0 };
   }
 
-  // 倒车 + 转向来躲：车尾先闪开，车头还留在弹道这一侧，随时能还击
-  function aiEvadeBack(me, threat) {
-    const b = threat.b;
-    const axis = Math.atan2(b.vy, b.vx);
-    const back = wrapPi(axis + (Math.random() < 0.5 ? 1 : -1) * Math.PI / 2);
-    aiBackTo(me, back);
+  /* 躲避决策：
+     1) 每帧把威胁弹道重建一遍（很便宜）；
+     2) 先看「上一条路现在还安不安全」——安全就接着走，不要每帧改主意；
+     3) 不安全（或者已经走满 0.18 秒）才把 16 个方向 × 前进 / 倒车 + 站住重算一遍。 */
+  function aiEscape(me, threats, dt, wantDir) {
+    aiSt.planT -= dt;
+
+    // 1) 威胁弹道（最多 3 颗）
+    const tracks = [];
+    for (let i = 0; i < threats.length && i < 3; i++) {
+      const b = threats[i].b;
+      const speed = Math.hypot(b.vx, b.vy) || BULLET_SPEED;
+      const pts = aiBulletTrack(b, planHorizon());
+      if (pts.length >= 9) {
+        tracks.push({ pts: pts, r: b.r || BULLET_R, dt: (AI_TRACK_STEP * AI_TRACK_KEEP) / speed });
+      }
+    }
+    if (!tracks.length) { aiSt.planDir = null; aiEscapeExec(me); return; }
+
+    // 2) 上一条路还行就继续
+    if (aiSt.planDir !== null && aiSt.planT > 0) {
+      const cur = aiPlanScore(me, tracks, aiSt.planDir, aiSt.planBack, aiSt.planStill, null);
+      if (cur.clear > 2.5) { aiSt.planClear = cur.clear; aiEscapeExec(me); return; }
+    }
+
+    // 3) 重算：先站住兜底，再逐条试
+    aiSt.planT = 0.18;
+    let best = aiPlanScore(me, tracks, me.angle, false, true, wantDir);
+    let bestDir = null;
+    let bestBack = false;
+    let bestStill = true;
+    for (let i = 0; i < AI_ESCAPE_N; i++) {
+      const a = (i * Math.PI * 2) / AI_ESCAPE_N;
+      const nDir = aiCfg.canBack === false ? 1 : 2;
+      for (let b = 0; b < nDir; b++) {
+        const back = b === 1;
+        const r = aiPlanScore(me, tracks, a, back, false, wantDir);
+        // 上一条路还安全就加个偏好，免得两条路打平时左右横跳
+        if (aiSt.planDir !== null && !aiSt.planStill && back === aiSt.planBack
+          && Math.abs(wrapPi(a - aiSt.planDir)) < 0.45) r.score += 6;
+        if (r.score > best.score) {
+          best = r;
+          bestDir = a;
+          bestBack = back;
+          bestStill = false;
+        }
+      }
+    }
+
+    aiSt.planDir = bestDir;
+    aiSt.planBack = bestBack;
+    aiSt.planStill = bestStill;
+    aiSt.planClear = best.clear;
+    aiEscapeExec(me);
   }
 
   /* ---- 未受威胁状态：沿最短路线接近、进攻、捡道具 ---- */
@@ -2485,17 +2830,27 @@
     aiWander(me, dt);
   }
 
-  // 躲避状态下也做一次假想射击：这一炮能命中就顺手回敬，躲归躲
+  /* 躲避状态下也做一次假想射击：这一炮能命中就顺手回敬，躲归躲。
+     注意「躲」和「打」在几何上是打架的：弹道从对手那边飞过来，往侧面让开之后
+     炮口就指着别处了。所以只要威胁还没逼到眼前，就允许它停下来把炮口转过去
+     打完这一炮；威胁一进 0.55 秒，立刻把方向盘交回躲避规划。 */
   function aiDodgeFire(me, foe, dist, dt) {
     if (!foe || !foe.active || !foe.alive) return false;
     if (aiSt.fireT > 0 || me.cd > 0) return false;
     if (ownBulletCount(me.id) >= MAX_OWN_BULLETS) return false;
     if (aiSpecialWeapon(me, foe, dist)) return true;
     const shot = dist > 520 ? null : aiShotPlan(me, foe, dt);
-    if (!shot) return false;
-    if (Math.abs(wrapPi(shot.angle - me.angle)) > aiCfg.aimTol) { aiSt.aimHold = 0; return false; }
-    if (!aiAligned(me, shot.angle, dt)) return false;   // 边躲边瞄，对上之后还要稳一下
-    return aiPullTrigger(me, shot);
+    if (!shot) { aiSt.aimHold = 0; return false; }
+    const err = Math.abs(wrapPi(shot.angle - me.angle));
+    if (err <= aiCfg.aimTol) {
+      aiAim(me, shot.angle, 0);                          // 已经对上：站定，稳住再打
+      if (!aiAligned(me, shot.angle, dt)) return true;
+      return aiPullTrigger(me, shot);
+    }
+    aiSt.aimHold = 0;
+    // 只差一点点就把炮口转过去（≤ 0.55 弧度约 32°）；差得多就别贪，先躲
+    if (err <= 0.55) { aiAim(me, shot.angle, 0); return true; }
+    return false;
   }
 
   /* ---- 主循环 ---- */
@@ -2548,7 +2903,8 @@
      *    有 → 躲避状态；没有 → 未受威胁状态。
      *    弹夹清空（自己打出去的子弹还占着四个坑、根本打不出去）也算躲避状态：
      *    打不了就先别站原地当靶子。 */
-    const threat = aiIncoming(me);
+    const threats = aiThreats(me, 3);          // 最多同时躲 3 颗
+    const threat = threats.length ? threats[0] : null;
     aiSt.inT = threat ? threat.t : -1;
     const dry = ownBulletCount(me.id) >= MAX_OWN_BULLETS;
     aiSt.state = (threat || dry) ? 'dodge' : 'free';
@@ -2578,19 +2934,34 @@
 
     if (aiSt.state === 'dodge') {
       /* 2) 躲避状态：优先躲。
-       *    - 预测命中在 0.9 秒内：立刻闪身（来不及转身就倒车带转向）
-       *    - 还早：边退边等，躲的同时做假想射击，能命中就开火
-       *    - 弹夹空了：倒车拉开距离，车头留在玩家身上等装填 */
-      if (threat && threat.t <= AI_EVADE_T) {
-        // 人类反应时间：看见子弹到打方向盘之间是有延迟的，延迟里保持原动作
+       *    - 预测会挨打：先过一遍人类反应延迟，然后交给躲避规划
+       *      （16 个方向 × 前进 / 倒车逐条试，哪条离弹道最远走哪条）
+       *    - 躲的同时照样做假想射击：算得出能命中就开火还击
+       *    - 弹夹打空：也按躲避处理，倒车拉开距离等装填 */
+      if (threat) {
+        aiSt.calmT = 0;
         aiSt.reactT += dt;
-        if (aiSt.reactT < aiCfg.react) return;
+        // 威胁还没逼到眼前：先把炮口转过去打一炮（打得出就打，打不出接着躲）
+        if (threat.t > AI_SHOOT_T && aiDodgeFire(me, foe, dist, dt)) { aiSt.mode = 'dodge'; return; }
+        // 人类反应时间：看见子弹到打方向盘之间是有延迟的。
+        // 延迟里不能站着不动——上一条躲避路线还在，就照着继续走。
+        if (aiSt.reactT < aiCfg.react) {
+          aiSt.mode = 'react';
+          if (aiSt.planDir !== null) aiEscapeExec(me);
+          return;
+        }
         aiSt.mode = 'dodge';
-        aiDodgeFire(me, foe, dist, dt);      // 躲之前先看这一炮值不值得还
-        aiEvade(me, threat, dt);
+        const wantDir = foeAlive ? Math.atan2(foe.y - me.y, foe.x - me.x) : null;
+        aiEscape(me, threats, dt, wantDir);
         return;
       }
-      aiSt.reactT = 0;
+      // 短暂「安全」不能把反应延迟一次清零：子弹贴着墙弹一下，预测就可能
+      // 翻脸几十毫秒。清零会让它下次重新愣一遍，而这一愣往往正好愣在子弹
+      // 弹回来的时候——所以只在「真的安静下来」之后才恢复成零。
+      aiSt.calmT += dt;
+      if (aiSt.calmT > 1.2) aiSt.reactT = 0;
+      aiSt.planDir = null;
+      aiSt.planStill = false;
 
       if (dry) {
         // 弹夹清空：贴得近就倒着退开（炮口仍对着玩家，空出位置立刻能打）
@@ -2602,16 +2973,16 @@
         return;
       }
 
-      // 威胁还远（0.9 ~ 2 秒）：不算紧急，边保持距离边按路线压上去
-      aiDodgeFire(me, foe, dist, dt);
+      // 理论走不到这儿（state=dodge 必定有 threat 或 dry），兜个底
       aiFree(me, foe, dist, hasLOS, dt);
       return;
     }
 
     /* 3) 未受威胁状态：沿最短路线接近玩家、主动进攻或拾取道具，边走边假想射击 */
-    aiSt.reactT = 0;
-    aiSt.dodgeDir = null;
-    aiSt.dodgeT = 0;
+    aiSt.calmT += dt;
+    if (aiSt.calmT > 1.2) aiSt.reactT = 0;
+    aiSt.planDir = null;
+    aiSt.planStill = false;
     aiFree(me, foe, dist, hasLOS, dt);
   }
 
@@ -3270,7 +3641,7 @@
     getState: function () { return state; },
     getMenuOpen: function () { return menuOpen; },
 
-    /* ---- 电脑难度：easy / normal / hard / laika ---- */
+    /* ---- 电脑难度：easy / normal / hard ---- */
     getDifficulty: function () { return aiDiff; },
     getDifficultyName: function () { return aiCfg.name; },
     listDifficulties: function () {
@@ -3345,6 +3716,44 @@
       t.input.ccw = 0;
       t.input.cw = 0;
       return true;
+    },
+
+    // 测试用：把整车挂起（不参与更新，也不吃子弹）——单人躲弹实验里用来「去掉对手」
+    parkTank: function (id) {
+      const t = tanks[id | 0];
+      if (!t) return false;
+      t.active = false;
+      return true;
+    },
+
+    /* 测试用：把地图临时改成「四周全是墙、中间 n×n 格空地」的封闭方厅，
+       用来验证电脑在狭窄房间里对着来回反弹的子弹能撑多久。 */
+    testBox: function (col, row, size) {
+      const n = Math.max(3, Math.min(9, Math.round(size || 5)));
+      let c0 = (col === undefined || col === null) ? ((COLS - n) >> 1) : Math.round(col);
+      let r0 = (row === undefined || row === null) ? ((ROWS - n) >> 1) : Math.round(row);
+      c0 = Math.max(1, Math.min(COLS - n - 1, c0));
+      r0 = Math.max(1, Math.min(ROWS - n - 1, r0));
+      const rows = [];
+      for (let r = 0; r < ROWS; r++) {
+        let line = '';
+        for (let c = 0; c < COLS; c++) {
+          line += (c >= c0 && c < c0 + n && r >= r0 && r < r0 + n) ? '.' : '#';
+        }
+        rows.push(line);
+      }
+      MAP = rows;
+      WALL = toWall(MAP);
+      floorTiles = null;
+      buildLayers();
+      // 顺手把方厅里的道具清掉，免得电脑跑去捡东西
+      for (let i = items.length - 1; i >= 0; i--) {
+        const it = items[i];
+        if (it.x >= c0 * TILE && it.x <= (c0 + n) * TILE && it.y >= r0 * TILE && it.y <= (r0 + n) * TILE) {
+          items.splice(i, 1);
+        }
+      }
+      return { c: c0, r: r0, n: n, x: (c0 + n / 2) * TILE, y: (r0 + n / 2) * TILE };
     },
 
     // 测试用：凭空打一颗子弹（验证 AI 的规避）
@@ -3427,7 +3836,10 @@
         })(),
         replans: aiSt.replans,                // 一共重建过几次路线
         backing: aiSt.backing,                // 这一帧在不在倒车
-        dd: aiSt.dodgeDir === null ? null : r2(aiSt.dodgeDir),   // 躲的方向
+        dd: aiSt.planDir === null ? null : r2(aiSt.planDir),   // 躲避规划选的方向
+        dStill: aiSt.planStill,               // 这一帧选的是「站住」
+        dBack: aiSt.planBack,                 // 这一帧选的是倒车
+        dClear: r2(aiSt.planClear),           // 这条路线的最小余量（px）
         stuck: r2(aiSt.stuckT),
         thr: r2(aiSt.throttle),
         inBack: me ? r2(me.input.back || 0) : 0,   // 这一帧写进去的倒车 / 打方向
