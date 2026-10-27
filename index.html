@@ -365,6 +365,9 @@
     align-items: center;
     justify-content: center;
     padding: 20px;
+    /* 面板比战场高时（手机上常见）要能滚，否则标题和按钮会被裁掉 */
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     background: rgba(5, 8, 13, .74);
     backdrop-filter: blur(7px);
     -webkit-backdrop-filter: blur(7px);
@@ -376,6 +379,8 @@
 
   .panel {
     width: min(100%, 460px);
+    margin: auto;              /* 配合 overflow-y:auto：装得下就居中，装不下就能滚 */
+    flex: 0 0 auto;
     text-align: center;
     line-height: 1.6;
     padding: 22px 24px 20px;
@@ -471,6 +476,110 @@
     font-style: normal;
     color: #ffd479;
     animation: blink 1.4s ease-in-out infinite;
+  }
+
+  /* 单人模式：难度选择卡片 */
+  .diff-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin: 14px 0 2px;
+  }
+
+  .diff-card {
+    -webkit-appearance: none;
+    appearance: none;
+    font-family: inherit;
+    text-align: left;
+    cursor: pointer;
+    padding: 9px 11px 10px;
+    border-radius: 12px;
+    border: 1px solid rgba(130, 170, 230, .22);
+    background: rgba(255, 255, 255, .035);
+    color: #cfdcec;
+    transition: border-color .14s ease, background .14s ease, transform .1s ease;
+  }
+
+  .diff-card b {
+    display: block;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: #eaf2ff;
+    margin-bottom: 3px;
+  }
+
+  .diff-card b i {
+    font-style: normal;
+    font-size: 9.5px;
+    font-weight: 500;
+    letter-spacing: .5px;
+    margin-left: 6px;
+    padding: 1px 5px;
+    border-radius: 6px;
+    vertical-align: 2px;
+    color: #101a26;
+    background: rgba(140, 190, 250, .85);
+  }
+
+  .diff-card span {
+    display: block;
+    font-size: 11px;
+    line-height: 1.55;
+    letter-spacing: .2px;
+    color: #8d9cb2;
+  }
+
+  .diff-card:hover {
+    border-color: rgba(255, 210, 130, .5);
+    background: rgba(255, 210, 130, .08);
+  }
+
+  .diff-card:active { transform: translateY(1px); }
+
+  .diff-card.laika {
+    border-color: rgba(255, 205, 120, .38);
+    background: rgba(255, 200, 110, .07);
+  }
+
+  .diff-card.laika b { color: #ffd479; }
+  .diff-card.laika b i { background: #ffd479; }
+
+  @media (max-width: 430px), (max-height: 780px) {
+    .panel { padding: 14px 16px 12px; }
+    .panel h2 { font-size: 22px; letter-spacing: 3px; }
+    .kicker { font-size: 9.5px; letter-spacing: 3px; margin-bottom: 6px; }
+    .panel p { font-size: 11.5px; line-height: 1.62; }
+    .diff-grid { gap: 6px; margin: 10px 0 0; }
+    .diff-card { padding: 7px 9px 8px; border-radius: 10px; }
+    .diff-card b { font-size: 13px; letter-spacing: 1.4px; margin-bottom: 2px; }
+    .diff-card b i { font-size: 9px; margin-left: 4px; padding: 1px 4px; }
+    .diff-card span { font-size: 10px; line-height: 1.45; }
+    .hint { margin-top: 10px; font-size: 11px; }
+    .panel-btns { margin-top: 10px; gap: 8px; }
+    .pbtn { min-width: 96px; padding: 7px 12px; font-size: 11.5px; }
+    .keys { margin: 10px 0 2px; gap: 6px; }
+  }
+
+  /* 手机上战场区域很矮（竖屏只有 255px 高），选难度时用极简排版：
+     去掉顶部小标 / 提示语 / 返回按钮，只留标题和四张卡 —— 主界面按钮本来就在页头 */
+  @media (max-width: 520px), (max-height: 820px) {
+    .overlay.picking-diff { padding: 10px; }
+    .overlay.picking-diff .kicker { display: none; }
+    .overlay.picking-diff #ovHint { display: none; }
+    .overlay.picking-diff .panel-btns { display: none; }
+    .overlay.picking-diff .panel { padding: 10px 12px 11px; }
+    .overlay.picking-diff .panel h2 { font-size: 19px; letter-spacing: 2px; margin-bottom: 4px; }
+    .overlay.picking-diff .diff-grid { margin: 6px 0 0; gap: 5px; }
+    .overlay.picking-diff .diff-card { padding: 6px 8px 7px; border-radius: 9px; }
+    .overlay.picking-diff .diff-card b { font-size: 12.5px; letter-spacing: 1px; margin-bottom: 1px; }
+    .overlay.picking-diff .diff-card b i { font-size: 9px; padding: 0 4px; }
+    .overlay.picking-diff .diff-card span { font-size: 10px; line-height: 1.38; }
+  }
+
+  /* 极窄：卡片改单列（但只在真的放不下时） */
+  @media (max-width: 340px) {
+    .diff-grid { grid-template-columns: 1fr; }
   }
 
   /* 遮罩面板内的按钮组 */
@@ -1346,7 +1455,7 @@
         <div class="modes">
           <button class="mode-card solo" id="btnSolo" type="button">
             <b>单人模式</b>
-            <span id="soloDesc">你和电脑 1v1 · 电脑会算反弹弹道、侧身躲子弹<br />键盘 WASD / 方向键，手机用屏幕摇杆</span>
+            <span id="soloDesc">你和电脑 1v1 · 四档难度（简单 / 中等 / 极难 / 莱卡）<br />电脑会算反弹弹道、侧身躲子弹，手机也能玩</span>
           </button>
           <button class="mode-card" id="btnLocal" type="button">
             <b>双人游戏</b>

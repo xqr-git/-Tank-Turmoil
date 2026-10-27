@@ -621,6 +621,7 @@
   let netEvents = [];                    // 待发送的表现事件（开火/命中/爆炸/反弹）
   let bulletSeq = 0;
   let panelVisible = false;
+  let diffPick = false;      // 正在选难度：这时候点空白处不能直接开局
 
   let netClock = 0;                      // 访客端本地时钟
   let tankKeys = [[], [], []];           // 访客端坦克关键帧
@@ -1535,22 +1536,110 @@
    *   去最后出现的位置搜寻。
    * ------------------------------------------------------- */
 
-  // 难度基准（每局开始时整体浮动一点，免得每局手感一模一样）
-  // 注意：这一套对电脑版、手机版 / 平板都是同一份，AI 里没有任何按设备类型
-  // 或操作方式分支的逻辑——触屏只是换了玩家自己的输入方式，电脑那边一个参数都不变。
-  const AI_BASE = {
-    jitter: 0.085,      // 瞄准误差幅度（弧度，±4.9°）
-    jitterHold: 0.30,   // 误差多久重掷一次
-    fireGap: 0.20,      // 两次开火之间的犹豫
-    sightAim: 0.115,    // 认为「已经对准」的角度阈值
-    fleeDist: 215,      // 多近的来袭子弹需要闪
-    keepMin: 120,       // 和玩家保持的距离区间
-    keepMax: 290,
-    grabRange: 340,     // 多近的道具值得绕过去捡
-    thinkGap: 0.24      // 重新寻路的间隔
+  /* =========================================================
+   * 6.4 难度档位
+   *   手感参数全部集中在这张表里：四个档位只改数值、不改代码。
+   *   最高档「莱卡」是按 TankTrouble 官方开发者（Subterranean Software）
+   *   公开的做法调的——前方 230° 打 23 条射线、最多预判 2 次反弹、
+   *   瞄准之后几乎不停顿就开火、开火间隔压到最短、绝不故意打偏。
+   *   官方那套数值跑在 30Hz、弹速也和我们不同，所以「秒数」是按同样的
+   *   压制感换算过来的，射线数 / 张角 / 反弹层数则照原样保留。
+   *   注意：这一套对电脑版、手机版 / 平板都是同一份，AI 里没有任何按设备
+   *   类型或操作方式分支的逻辑——触屏只是换了玩家自己的输入方式。
+   * ======================================================= */
+  const AI_TIERS = {
+    easy: {
+      key: 'easy', name: '简单', tag: '先练手',
+      blurb: '瞄得慢、常打偏，不会算反弹，先拿它练手',
+      waitMap: 1.20,   // 开局发呆多久（官方的 Wait After Map）
+      react: 0.40,     // 看见子弹到打方向盘的反应时间
+      aimTol: 0.055,   // 认为「炮口已经对准」的角度阈值
+      jitter: 0.130,   // 瞄准漂移幅度（弧度）
+      jitterHold: 0.42,
+      arcRays: 15, arcSpan: 140, bounces: 0,   // 弹道扫描：射线数 / 张角 / 反弹层数
+      lineup: 0.55,    // 对准之后还要稳多久才扣扳机
+      refire: 2.20,    // 两炮之间的间隔
+      miss: 0.50, missMag: 0.11,               // 故意打偏的概率 / 偏多少
+      hesitate: 0.34,  // 看见机会却不开枪的概率
+      shotCd: 0.35,    // 多久重算一次弹道
+      keepMin: 170, keepMax: 340, grabRange: 200,
+      dodgeErr: 0.45,  // 两侧都能躲时躲错边的概率
+      burst: 1, burstGap: 0.30
+    },
+    normal: {
+      key: 'normal', name: '中等', tag: '默认',
+      blurb: '会绕路逼近、会算一层反弹、会侧身躲弹',
+      waitMap: 0.90,
+      react: 0.22,
+      aimTol: 0.040,
+      jitter: 0.085,
+      jitterHold: 0.30,
+      arcRays: 23, arcSpan: 230, bounces: 1,
+      lineup: 0.14,
+      refire: 0.86,
+      miss: 0.14, missMag: 0.055,
+      hesitate: 0.16,
+      shotCd: 0.20,
+      keepMin: 150, keepMax: 320, grabRange: 340,
+      dodgeErr: 0.25,
+      burst: 2, burstGap: 0.15
+    },
+    hard: {
+      key: 'hard', name: '极难', tag: '会算反弹',
+      blurb: '反应更快、几乎不打偏，两层反弹也敢打',
+      waitMap: 0.45,
+      react: 0.14,
+      aimTol: 0.024,
+      jitter: 0.045,
+      jitterHold: 0.22,
+      arcRays: 31, arcSpan: 270, bounces: 2,
+      lineup: 0.07,
+      refire: 0.58,
+      miss: 0.03, missMag: 0.03,
+      hesitate: 0.02,
+      shotCd: 0.12,
+      keepMin: 110, keepMax: 250, grabRange: 430,
+      dodgeErr: 0.06,
+      burst: 2, burstGap: 0.12
+    },
+    laika: {
+      key: 'laika', name: '莱卡', tag: '官方AI同款',
+      blurb: '照官方莱卡调：230° 打 23 条射线、预判 2 次反弹',
+      waitMap: 0.25,
+      react: 0.05,          // 官方：几乎零反应延迟（只有开局 Wait After Map）
+      aimTol: 0.010,
+      jitter: 0.008,        // 官方：不故意打偏，所以只剩极小的机械误差
+      jitterHold: 0.15,
+      arcRays: 23, arcSpan: 230, bounces: 2,   // 官方：230° / 23 条射线 / 预判 2 次反弹
+      lineup: 0.02,
+      refire: 0.26,
+      miss: 0, missMag: 0,  // 官方：Hard 以上不再故意打偏
+      hesitate: 0,
+      shotCd: 0.08,
+      keepMin: 65, keepMax: 205, grabRange: 480,
+      dodgeErr: 0,
+      burst: 3, burstGap: 0.09
+    }
   };
+  const AI_ORDER = ['easy', 'normal', 'hard', 'laika'];
+  let aiDiff = 'normal';
 
-  let aiCfg = AI_BASE;
+  // 记住上次选的难度（隐私模式 / 本地文件打开时 localStorage 可能不可用，忽略即可）
+  const DIFF_STORE = 'tank.diff';
+  function loadDiffPref() {
+    try {
+      const s = window.localStorage.getItem(DIFF_STORE);
+      if (s && AI_TIERS[s]) aiDiff = s;
+    } catch (e) { /* 忽略 */ }
+  }
+  function saveDiffPref() {
+    try { window.localStorage.setItem(DIFF_STORE, aiDiff); } catch (e) { /* 忽略 */ }
+  }
+  loadDiffPref();
+
+  const AI_BASE = AI_TIERS.normal;
+
+  let aiCfg = AI_TIERS.normal;
   const aiSt = {
     route: { pts: [], len: 0 },   // 当前最短路线（折线点列，0.05 秒整条重建）
     routeT: 0,                    // 距离下一次重建还有多久
@@ -1587,23 +1676,42 @@
     inT: -1,             // 最近一颗会命中自己的子弹还有多久到（-1 = 没有）
     inBounces: 0,
     reactT: 0,           // 发现威胁后已经「反应」了多久（人类不是零延迟）
+    aimHold: 0,          // 炮口对上之后稳了多久（够 lineup 才扣扳机）
+    shotsFired: 0,       // 这一局一共打了几发（含故意打偏的，用来量命中率）
+    shotsMissed: 0,      // 其中「故意打偏」的几发
+    waitT: 0,            // 开局发呆计时（官方 Wait After Map）
     dodgeDir: null,
     dodgeT: 0,
     mode: 'idle'
   };
 
   function aiResetRound() {
-    const f = 0.82 + Math.random() * 0.36;     // 0.82 ~ 1.18
+    const tier = AI_TIERS[aiDiff] || AI_TIERS.normal;
+    const f = 0.82 + Math.random() * 0.36;     // 0.82 ~ 1.18（同一档位每局也略有浮动）
     aiCfg = {
-      jitter: AI_BASE.jitter * f,
-      jitterHold: AI_BASE.jitterHold,
-      fireGap: AI_BASE.fireGap * (2 - f),
-      sightAim: AI_BASE.sightAim * f,
-      fleeDist: AI_BASE.fleeDist,
-      keepMin: AI_BASE.keepMin,
-      keepMax: AI_BASE.keepMax,
-      grabRange: AI_BASE.grabRange,
-      thinkGap: AI_BASE.thinkGap
+      key: tier.key,
+      name: tier.name,
+      waitMap: tier.waitMap,
+      react: tier.react,
+      aimTol: tier.aimTol,
+      jitter: tier.jitter * f,
+      jitterHold: tier.jitterHold,
+      arcRays: tier.arcRays,
+      arcSpan: tier.arcSpan,
+      bounces: tier.bounces,
+      lineup: tier.lineup,
+      refire: tier.refire * (2 - f),
+      miss: tier.miss,
+      missMag: tier.missMag,
+      hesitate: tier.hesitate,
+      shotCd: tier.shotCd,
+      keepMin: tier.keepMin,
+      keepMax: tier.keepMax,
+      grabRange: tier.grabRange,
+      dodgeErr: tier.dodgeErr,
+      burst: tier.burst,
+      burstGap: tier.burstGap,
+      fireGap: tier.refire       // 旧字段（霰弹枪当间隔用），跟档位一起走
     };
     aiSt.route.pts = [];       // 旧路线在开局就作废，第一帧重新生成
     aiSt.route.len = 0;
@@ -1617,7 +1725,8 @@
     aiSt.goalR = -1;
     aiSt.errT = 0;
     aiSt.err = 0;
-    aiSt.fireT = 0.8;          // 开局先愣一下，别一响铃就开炮
+    aiSt.fireT = aiCfg.waitMap;   // 开局先愣一下（官方 Wait After Map），别一响铃就开炮
+    aiSt.waitT = aiCfg.waitMap;
     aiSt.stuckT = 0;
     aiSt.throttle = 0;
     aiSt.aimAngle = 0;
@@ -1636,6 +1745,10 @@
     aiSt.inT = -1;
     aiSt.inBounces = 0;
     aiSt.reactT = 0;
+    aiSt.aimHold = 0;
+    aiSt.shotsFired = 0;
+    aiSt.shotsMissed = 0;
+    aiSt.waitT = aiCfg.waitMap;
     aiSt.dodgeDir = null;
     aiSt.dodgeT = 0;
     aiSt.mode = 'idle';
@@ -1689,10 +1802,8 @@
   // 八个方向：前四个横平竖直，后四个斜线（斜向要求两个相邻直行格都通，见下面过滤）
   const AI_DIRS = [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]];
   const AI_LOOK = 2.0;            // 威胁预测窗口：未来 2 秒
-  const AI_REACT = 0.22;          // 看见子弹到动方向盘的反应时间
   const AI_EVADE_T = 0.9;         // 预测命中落在这个时间内 → 立刻闪身
   const AI_BACK_STEP = TILE / 6;  // 脱困只退一个墙宽的 1/6
-  const AI_SHOT_TOL = 0.035;      // 炮口和理想弹道差多少算「已经对准」（约 2°）
   const AI_SIM_STEP = 3;          // 弹道模拟的步进（和真实子弹一致）
 
   const aiFields = Object.create(null);   // 距离场缓存：key = 地图 + 目标格
@@ -1903,11 +2014,23 @@
     }
     if (aiSt.stuckT > 0.45) {
       aiSt.stuckT = 0;
-      aiSt.escapeT = 0.3;
-      aiSt.escapeStep = 0;
-      aiSt.backFromX = me.x;
-      aiSt.backFromY = me.y;
-      aiSt.wander = me.angle + (Math.random() < 0.5 ? 1 : -1) * (0.9 + Math.random() * 0.8);
+      // 官方脱困：先退一个墙宽的 1/6，然后朝「当前格子的中心」开，把车身从墙角拖出来。
+      // 但附近有子弹经过时不脱困——不为了出来把自己送进弹道。
+      const nearBullet = aiSt.inT >= 0 && aiSt.inT < 0.6;
+      if (!nearBullet) {
+        const cc = Math.floor(me.x / TILE);
+        const cr = Math.floor(me.y / TILE);
+        const cx = (cc + 0.5) * TILE;
+        const cy = (cr + 0.5) * TILE;
+        aiSt.escapeT = 0.34;
+        aiSt.escapeStep = 0;
+        aiSt.backFromX = me.x;
+        aiSt.backFromY = me.y;
+        // 已经站在格子中间了：随便偏一个角度挪开，别原地震
+        aiSt.wander = Math.hypot(cx - me.x, cy - me.y) > 8
+          ? Math.atan2(cy - me.y, cx - me.x)
+          : me.angle + (Math.random() < 0.5 ? 1 : -1) * (0.9 + Math.random() * 0.8);
+      }
       return;
     }
 
@@ -1963,11 +2086,16 @@
   }
 
   // 模拟「从 (x,y) 沿 angle 打一发」：会不会命中 target、多久命中、弹了几次
+  //   opt.maxBounce：最多允许弹几次（难度档位决定，莱卡档 2 次）
+  //   opt.avoid：这发子弹不许打到的东西（通常是自己）——沿途一旦擦到就整条作废，
+  //             对应官方那条「射线贴自己太近就放弃」的红线
   function aiSimShot(x, y, angle, target, opt) {
     opt = opt || {};
     const speed = opt.speed || BULLET_SPEED;
     const life = opt.life || 1.2;
     const rad = opt.r || BULLET_R;
+    const maxBounce = opt.maxBounce === undefined ? 99 : opt.maxBounce;
+    const avoid = opt.avoid || null;
     const dt = AI_SIM_STEP / speed;
 
     let px = x;
@@ -1980,19 +2108,26 @@
 
     while (t < life) {
       t += dt;
-      if (target) {
-        probe.x = px;
-        probe.y = py;
-        if (bulletHitsTank(probe, target)) {
-          return { hit: true, t: t, bounces: bounces, x: px, y: py };
-        }
+      probe.x = px;
+      probe.y = py;
+      if (avoid && bulletHitsTank(probe, avoid)) {
+        return { hit: false, self: true, t: t, bounces: bounces, x: px, y: py };
+      }
+      if (target && bulletHitsTank(probe, target)) {
+        return { hit: true, t: t, bounces: bounces, x: px, y: py };
       }
       const nx = px + vx * dt;
-      if (rectHitsWall(nx, py, rad)) { vx = -vx; bounces++; }
-      else px = nx;
+      if (rectHitsWall(nx, py, rad)) {
+        if (bounces >= maxBounce) break;
+        vx = -vx;
+        bounces++;
+      } else px = nx;
       const ny = py + vy * dt;
-      if (rectHitsWall(px, ny, rad)) { vy = -vy; bounces++; }
-      else py = ny;
+      if (rectHitsWall(px, ny, rad)) {
+        if (bounces >= maxBounce) break;
+        vy = -vy;
+        bounces++;
+      } else py = ny;
       if (bounces > 20) break;
       if (px < -8 || py < -8 || px > W + 8 || py > H + 8) break;
     }
@@ -2058,52 +2193,86 @@
   }
 
   /* 找一条能打中玩家的炮口方向（允许借墙反弹）。
-   * 先试「正对玩家」附近 ±0.09 的细角度，再全向粗扫一圈找反弹线路。
-   * 命中时间越短、反弹次数越少越优先。 */
+   *   做法照着 TankTrouble 官方的莱卡：以「玩家方向」为中心打一个扇形射线束，
+   *   射线数、张角、能预判几层反弹都由难度档位决定（莱卡档就是官方那套 230° / 23 条 / 2 层）。
+   *   射线之间有空隙，所以命中之后再在最优点附近细扫一遍，避免「差一点点」漏掉。
+   *   命中时间越短、反弹次数越少越优先。 */
   function aiFindShot(me, foe) {
     if (!foe || !foe.active || !foe.alive) return null;
     const dist = Math.hypot(foe.x - me.x, foe.y - me.y);
     if (dist > 620) return null;
 
     // 手上是激光就按激光的参数算，其它武器走各自的老逻辑
-    let opt = { life: 1.2 };
-    if (me.weapon === 'laser') opt = { life: 1.1, speed: LASER_SPEED, r: LASER_R };
+    let opt = { life: 1.2, maxBounce: aiCfg.bounces, avoid: me };
+    if (me.weapon === 'laser') opt = { life: 1.1, speed: LASER_SPEED, r: LASER_R, maxBounce: aiCfg.bounces, avoid: me };
     else if (me.weapon) return null;
 
     const base = Math.atan2(foe.y - me.y, foe.x - me.x);
+    const span = aiCfg.arcSpan * Math.PI / 180;
+    const rays = Math.max(3, aiCfg.arcRays);
+    const step = span / (rays - 1);
     let best = null;
+
     const test = function (a) {
       const mz = muzzlePoint(me, Math.cos(a), Math.sin(a), opt.r);
-      if (!mz) return;
+      if (!mz) return false;
       const r = aiSimShot(mz.x, mz.y, a, foe, opt);
-      if (!r.hit) return;
+      if (!r.hit) return false;
       const score = r.t + r.bounces * 0.22;
       if (!best || score < best.score) {
         best = { angle: a, t: r.t, bounces: r.bounces, score: score, dist: dist };
       }
+      return true;
     };
+
+    // 1) 扇形粗扫（档位决定条数与张角）
+    for (let i = 0; i < rays; i++) test(base - span / 2 + i * step);
+    // 2) 正对玩家附近细扫：直射是最常用、也最该打准的一条
     for (let i = -4; i <= 4; i++) test(base + i * 0.0225);
-    for (let i = 0; i < 32; i++) test(-Math.PI + (i * Math.PI * 2) / 32);
+    // 3) 粗扫找到方向后，在它周围补几条，弥补射线之间的空隙
+    if (best) {
+      const c = best.angle;
+      for (let i = -3; i <= 3; i++) {
+        if (i) test(c + i * step * 0.28);
+      }
+    }
     if (!best) return null;
 
-    // 瞄准不是完美的：加一点角度抖动，偶尔还会迟疑一下不开枪
-    best.angle += (Math.random() * 2 - 1) * 0.022;
-    if (Math.random() < 0.12) return null;
+    // 瞄准不是完美的：档位决定漂移多大
+    best.angle += aiSt.err * 0.6 + (Math.random() * 2 - 1) * aiCfg.jitter * 0.35;
+    // 看见机会却犹豫一下（越难越少，莱卡档为 0）
+    if (aiCfg.hesitate > 0 && Math.random() < aiCfg.hesitate) return null;
+    // 故意打偏：官方在简单档给到 50%，越难越少，莱卡档完全没有
+    if (aiCfg.miss > 0 && Math.random() < aiCfg.miss) {
+      best.angle += (Math.random() < 0.5 ? -1 : 1) * aiCfg.missMag * (0.6 + Math.random() * 0.8);
+      best.missed = true;
+    }
 
-    // 「按情况射出数枚」：直射且够近就补一枪；靠反弹的线路容错低，只打一发
+    // 「按情况射出数枚」：直射且够近才补枪；靠反弹的线路容错低，只打一发
     let burst = 1;
-    if (best.bounces === 0 && best.t < 0.62 && dist < 420) burst = 2;
+    if (best.bounces === 0 && best.t < 0.62 && dist < 420) burst = aiCfg.burst;
     best.burst = burst;
     return best;
   }
 
-  // 弹道规划节流：0.2 秒算一次就够，别每帧全向扫描
+  // 弹道规划节流：档位决定多久重算一次（越难越勤）
   function aiShotPlan(me, foe, dt) {
     aiSt.shotCd = Math.max(0, aiSt.shotCd - dt);
     if (aiSt.shotCd > 0) return aiSt.shot;
-    aiSt.shotCd = 0.2;
+    aiSt.shotCd = aiCfg.shotCd;
     aiSt.shot = aiFindShot(me, foe);
     return aiSt.shot;
+  }
+
+  /* 炮口对上之后还要「稳」够 lineup 秒才扣扳机。
+     这是官方削弱 AI 的第一招（瞄准延迟 0.6→0 秒）：让玩家看得见它在瞄你。 */
+  function aiAligned(me, angle, dt) {
+    if (Math.abs(wrapPi(angle - me.angle)) > aiCfg.aimTol) {
+      aiSt.aimHold = 0;
+      return false;
+    }
+    aiSt.aimHold += dt;
+    return aiSt.aimHold >= aiCfg.lineup;
   }
 
   // 真的扣扳机（假想弹道已经算出来、炮口也对上了才会走到这儿）
@@ -2111,9 +2280,12 @@
     if (aiSt.fireT > 0 || me.cd > 0) return false;
     if (ownBulletCount(me.id) >= MAX_OWN_BULLETS) return false;
     me.firing = true;
+    aiSt.shotsFired++;
+    if (shot.missed) aiSt.shotsMissed++;
     aiSt.burstLeft = Math.max(0, shot.burst - 1);
-    // 打一发之后要缓一下（连发的第二发除外），否则对局几秒就结束了
-    aiSt.fireT = shot.burst > 1 ? 0.15 : (0.46 + Math.random() * 0.2);
+    // 打一发之后要缓一下（连发的第二发除外），越难缓得越短
+    aiSt.fireT = shot.burst > 1 ? aiCfg.burstGap
+      : aiCfg.refire * (0.85 + Math.random() * 0.3);
     aiSt.shotCd = 0;          // 打出去立刻重算（玩家会躲）
     return true;
   }
@@ -2218,7 +2390,7 @@
         return Math.abs(wrapPi(a1 - me.angle)) - Math.abs(wrapPi(a2 - me.angle));
       });
       // 两侧都能躲时偶尔判断失误、挑了绕远的那边——给玩家留出可乘之机
-      pick = (cands.length > 1 && Math.random() < 0.25) ? cands[1] : cands[0];
+      pick = (cands.length > 1 && Math.random() < aiCfg.dodgeErr) ? cands[1] : cands[0];
     }
     aiSt.dodgeDir = pick;
     aiSt.dodgeT = 0.3;
@@ -2243,12 +2415,12 @@
       // 假想射击：先算一条能命中玩家的弹道（含借墙反弹），炮口对上了才开炮
       const shot = dist > 520 ? null : aiShotPlan(me, foe, dt);
       if (shot) {
-        const errS = Math.abs(wrapPi(shot.angle - me.angle));
-        if (errS <= AI_SHOT_TOL) {
+        if (Math.abs(wrapPi(shot.angle - me.angle)) <= aiCfg.aimTol) {
           aiAim(me, shot.angle, 0);       // 站定，用精确角度瞄准
-          aiPullTrigger(me, shot);
+          if (aiAligned(me, shot.angle, dt)) aiPullTrigger(me, shot);
           return;
         }
+        aiSt.aimHold = 0;
         // 还没对上：离得远就沿最短路线压上去，够近了才停下转炮口
         if (dist > aiCfg.keepMin) { aiGoto(me, foe.x, foe.y, dt); return; }
         aiAim(me, shot.angle, 0);
@@ -2321,7 +2493,8 @@
     if (aiSpecialWeapon(me, foe, dist)) return true;
     const shot = dist > 520 ? null : aiShotPlan(me, foe, dt);
     if (!shot) return false;
-    if (Math.abs(wrapPi(shot.angle - me.angle)) > AI_SHOT_TOL) return false;
+    if (Math.abs(wrapPi(shot.angle - me.angle)) > aiCfg.aimTol) { aiSt.aimHold = 0; return false; }
+    if (!aiAligned(me, shot.angle, dt)) return false;   // 边躲边瞄，对上之后还要稳一下
     return aiPullTrigger(me, shot);
   }
 
@@ -2390,6 +2563,19 @@
       }
     }
 
+    /* 开局「发呆」：官方把它叫 Wait After Map，用来模拟人的反应时间。
+       这段时间里什么都不做（路线已经生成好了，倒计时一结束它就会冲出来）。 */
+    if (aiSt.waitT > 0) {
+      // 有人朝它开枪就立刻「醒」——发呆是为了像人，不是为了站着挨打
+      if (threat && threat.t <= AI_EVADE_T) {
+        aiSt.waitT = 0;
+      } else {
+        aiSt.waitT -= dt;
+        aiAim(me, me.angle, 0);
+        return;
+      }
+    }
+
     if (aiSt.state === 'dodge') {
       /* 2) 躲避状态：优先躲。
        *    - 预测命中在 0.9 秒内：立刻闪身（来不及转身就倒车带转向）
@@ -2398,7 +2584,7 @@
       if (threat && threat.t <= AI_EVADE_T) {
         // 人类反应时间：看见子弹到打方向盘之间是有延迟的，延迟里保持原动作
         aiSt.reactT += dt;
-        if (aiSt.reactT < AI_REACT) return;
+        if (aiSt.reactT < aiCfg.react) return;
         aiSt.mode = 'dodge';
         aiDodgeFire(me, foe, dist, dt);      // 躲之前先看这一炮值不值得还
         aiEvade(me, threat, dt);
@@ -2574,6 +2760,7 @@
 
   function advance() {
     if (mode === 'guest') return;
+    if (diffPick) return;          // 正在选难度：先选完
     // 爆炸还在演、比分还没跳出来时不允许跳过，避免误触
     if (state === 'roundOver' && (pendingOverlay || awardTimer > 0)) return;
     if (state === 'ready' || state === 'roundOver') {
@@ -3026,15 +3213,54 @@
     });
   }
 
+  /* 单人模式第一步：选难度。
+     卡片直接写在 desc 里（overlay 会忽略按钮上的点击，所以点卡片不会顺带触发
+     「点屏幕开始」）；点中一张就往下一个面板走，用这一档的 AI 开打。 */
+  function showDifficultyPanel() {
+    diffPick = true;
+    let cards = '';
+    for (let i = 0; i < AI_ORDER.length; i++) {
+      const t = AI_TIERS[AI_ORDER[i]];
+      cards += '<button type="button" class="diff-card ' + t.key + '" data-diff="' + t.key + '">'
+        + '<b>' + t.name + '<i>' + t.tag + '</i></b>'
+        + '<span>' + t.blurb + '</span></button>';
+    }
+    showOverlay({
+      kicker: 'Solo Battle · 人机对战',
+      title: '电脑难度',
+      desc: '<div class="diff-grid">' + cards + '</div>',
+      showKeys: false,
+      hint: '点一张卡片<em>进入战斗</em>',
+      actions: [{ label: '返回主界面', onClick: exitToMenu }]
+    });
+    if (overlayEl && overlayEl.classList) overlayEl.classList.add('picking-diff');
+    if (!overlayEl || typeof overlayEl.querySelectorAll !== 'function') return;
+    const list = overlayEl.querySelectorAll('.diff-card');
+    for (let i = 0; i < list.length; i++) {
+      list[i].addEventListener('click', function (ev) {
+        ev.preventDefault();
+        ev.stopPropagation();
+        const k = this.getAttribute('data-diff');
+        if (AI_TIERS[k]) { aiDiff = k; saveDiffPref(); }
+        aiResetRound();            // 换档立刻生效：路线、弹道、节奏全部按新档位重来
+        showSoloStartPanel();
+      });
+    }
+  }
+
   // 单人模式的开局面板：只介绍「你和电脑」，不提第二套键位
   function showSoloStartPanel() {
+    diffPick = false;
+    if (overlayEl && overlayEl.classList) overlayEl.classList.remove('picking-diff');
     paintKeyCards(true);
     showOverlay({
       kicker: 'Solo Battle · 人机对战',
       title: '坦克动荡',
-      desc: '你开红方，电脑开蓝方。<br />炮口始终朝向车头，靠转向瞄准；子弹会一直反弹（不限次数），小心自己的跳弹。<br />炮弹无限、每 8 秒自行消失，但同时最多 <b>4 颗</b>在场上（HUD 小弹头就是剩余弹药），两炮之间至少隔 0.35 秒。<br />场上每 15 秒刷一个<b>激光道具</b>（单人模式只保留这一种）：速度约普通弹 3 倍、一发打掉 <b>2 滴血</b>，用完就没了——电脑也会跟你抢。<br />电脑会沿最短路线逼近、<b>算好反弹角度隔墙打你</b>，还会盯着飞来的子弹<b>侧身躲</b>；它转身和反应需要时间，<b>贴身近战</b>是你的机会。<br />单人模式<b>没有隐身技能</b>，双方始终看得见对方。<br />每局结束自动续局并<b>随机换一张地图</b>（双人 4 张），比分累积不封顶。',
+      desc: '电脑难度：<b>' + aiCfg.name + '</b>（' + (AI_TIERS[aiDiff] ? AI_TIERS[aiDiff].tag : '') + '）<br />'
+        + '你开红方，电脑开蓝方。<br />炮口始终朝向车头，靠转向瞄准；子弹会一直反弹（不限次数），小心自己的跳弹。<br />炮弹无限、每 8 秒自行消失，但同时最多 <b>4 颗</b>在场上（HUD 小弹头就是剩余弹药），两炮之间至少隔 0.35 秒。<br />场上每 15 秒刷一个<b>激光道具</b>（单人模式只保留这一种）：速度约普通弹 3 倍、一发打掉 <b>2 滴血</b>，用完就没了——电脑也会跟你抢。<br />电脑会沿最短路线逼近、<b>算好反弹角度隔墙打你</b>，还会盯着飞来的子弹<b>侧身躲</b>；难度越高它反应越快、越少打偏。<br />单人模式<b>没有隐身技能</b>，双方始终看得见对方。<br />每局结束自动续局并<b>随机换一张地图</b>（双人 4 张），比分累积不封顶。',
       showKeys: true,
-      hint: '点击<em>屏幕</em>开始对战'
+      hint: '点击<em>屏幕</em>开始对战',
+      actions: [{ label: '换难度', onClick: showDifficultyPanel }]
     });
   }
 
@@ -3043,6 +3269,21 @@
     getMode: function () { return mode; },
     getState: function () { return state; },
     getMenuOpen: function () { return menuOpen; },
+
+    /* ---- 电脑难度：easy / normal / hard / laika ---- */
+    getDifficulty: function () { return aiDiff; },
+    getDifficultyName: function () { return aiCfg.name; },
+    listDifficulties: function () {
+      return AI_ORDER.map(function (k) { return { key: k, name: AI_TIERS[k].name, tag: AI_TIERS[k].tag }; });
+    },
+    // 换档：重新按新档位布置这一局的 AI（路线、弹道节奏、瞄准精度全部重来）
+    setDifficulty: function (k) {
+      if (!AI_TIERS[k]) return false;
+      aiDiff = k;
+      saveDiffPref();
+      aiResetRound();
+      return true;
+    },
 
     // 触屏相关：设备判定结果、当前是否显示摇杆、强制开关（测试用）
     isTouchDevice: function () { return TOUCH_DEVICE; },
@@ -3163,6 +3404,16 @@
       return {
         mode: aiSt.mode,
         state: aiSt.state,                    // free = 未受威胁 / dodge = 躲避
+        diff: aiDiff,                         // 当前难度 key
+        tier: aiCfg.name,                     // 当前难度名
+        react: r2(aiCfg.react),               // 这一档的反应延迟
+        lineup: r2(aiCfg.lineup),             // 对准后到开炮的延迟
+        refire: r2(aiCfg.refire),             // 两炮间隔
+        bounces: aiCfg.bounces,               // 预判几层反弹
+        arcRays: aiCfg.arcRays,               // 弹道射线数
+        aimHold: r2(aiSt.aimHold),
+        shots: aiSt.shotsFired,               // 这一局打了几发
+        missed: aiSt.shotsMissed,             // 其中故意打偏的
         route: aiSt.pathLen,
         routePts: aiSt.route.pts.length,      // 当前路线折线有几个点
         diagSegs: (function () {              // 路线里斜着走的段数（验证斜线寻路用）
@@ -3269,7 +3520,7 @@
       state = 'ready';
       countdown = 0;
       updateHud();
-      showSoloStartPanel();
+      showDifficultyPanel();     // 先选难度，选完才进战斗
     },
 
     // 联机主机：直接开第一局（n = 本局人数，2 或 3）
@@ -3665,6 +3916,8 @@
   function hideOverlay() {
     overlayEl.classList.add('hidden');
     panelVisible = false;
+    diffPick = false;
+    if (overlayEl && overlayEl.classList) overlayEl.classList.remove('picking-diff');
     setPanelActions(null);
     // 双人同屏：面板挡住了提示，等真正开打再把「推荐平板」亮出来（每进入一次模式只亮一次）
     if (duelTouch && !duelTipShown) {
@@ -3677,7 +3930,7 @@
    *   只接管「等开局 / 结算 / 暂停 / 返回确认」这几种面板，按钮自己处理点击 */
   if (overlayEl && overlayEl.addEventListener) {
     overlayEl.addEventListener('click', function (e) {
-      if (!panelVisible) return;
+      if (!panelVisible || diffPick) return;
       const t = e.target;
       if (t && t.closest && t.closest('button, a, input, .pbtn')) return;
       primeAudio();
